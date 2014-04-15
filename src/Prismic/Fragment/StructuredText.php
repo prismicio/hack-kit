@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -17,12 +17,15 @@ use Prismic\Fragment\Block\ImageBlock;
 use Prismic\Fragment\Block\ListItemBlock;
 use Prismic\Fragment\Block\ParagraphBlock;
 use Prismic\Fragment\Block\PreformattedBlock;
+use Prismic\Fragment\Block\BlockInterface;
 use Prismic\Fragment\Link\DocumentLink;
 use Prismic\Fragment\Link\MediaLink;
 use Prismic\Fragment\Link\WebLink;
+use Prismic\Fragment\Link\LinkInterface;
 use Prismic\Fragment\Span\EmSpan;
 use Prismic\Fragment\Span\HyperlinkSpan;
 use Prismic\Fragment\Span\StrongSpan;
+use Prismic\Fragment\Span\SpanInterface;
 
 class StructuredText implements FragmentInterface
 {
@@ -240,7 +243,7 @@ class StructuredText implements FragmentInterface
 
     }
 
-    public static function parseSpan($json)
+    public static function parseSpan($json): ?SpanInterface
     {
         $type = $json->type;
         $start = $json->start;
@@ -273,7 +276,7 @@ class StructuredText implements FragmentInterface
         return null;
     }
 
-    public static function parseText($json)
+    public static function parseText($json): ParsedText
     {
         $text = $json->text;
         $spans = array();
@@ -287,7 +290,7 @@ class StructuredText implements FragmentInterface
         return new ParsedText($text, $spans);
     }
 
-    public static function parseBlock($json)
+    public static function parseBlock($json): ?BlockInterface
     {
         if ($json->type == 'heading1') {
             $p = StructuredText::parseText($json);
@@ -348,7 +351,7 @@ class StructuredText implements FragmentInterface
         return null;
     }
 
-    public static function parse($json)
+    public static function parse($json): StructuredText
     {
         $blocks = array();
         foreach ($json as $blockJson) {
