@@ -1,7 +1,7 @@
 <?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -23,7 +23,7 @@ class Api
      * @param ApiData $data
      * @param string $accessToken
      */
-    private function __construct(ApiData $data, ?string $accessToken)
+    private function __construct(ApiData $data, ?string $accessToken=null)
     {
         $this->data        = $data;
         $this->accessToken = $accessToken;
@@ -32,28 +32,22 @@ class Api
     /**
      * returns all repositories references
      *
-     * @return array
+     * @return ImmMap
      */
     public function refs(): ImmMap<string, Ref>
     {
         $refs = $this->data->getRefs();
-        $groupBy = array();
+        $groupBy = new Map<string,Vector<Ref>>();
         foreach ($refs as $ref) {
-            if (isset($refs[$ref->getLabel()])) {
-                $arr = $refs[$ref->getLabel()];
-                array_push($arr, $ref);
-                $groupBy[$ref->getLabel()] = $arr;
+            $maybeGrouped = $groupBy->get($ref->getLabel());
+            if (isset($maybeGrouped)) {
+                $maybeGrouped->add($ref);
+                $groupBy->set($ref->getLabel(), $maybeGrouped);
             } else {
-                $groupBy[$ref->getLabel()] = array($ref);
+                $groupBy->set($ref->getLabel(), new Vector(array($ref)));
             }
         }
-
-        $results = ImmMap<string, Ref>();
-        foreach ($groupBy as $label => $values) {
-            $results[$label] = $values[0];
-        }
-
-        return $results;
+        return $groupBy->map($refs ==> $refs->at(0))->toImmMap();
     }
 
     public function bookmarks(): ImmMap<string, string>
@@ -69,7 +63,7 @@ class Api
     /**
      * returns the master reference repository
      *
-     * @return string
+     * @return Ref
      */
     public function master(): Ref
     {
@@ -79,7 +73,7 @@ class Api
     /**
      * returns all forms availables
      *
-     * @return mixed
+     * @return ImmMap
      */
     public function forms(): ImmMap<string, SearchForm>
     {

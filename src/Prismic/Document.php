@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -44,8 +44,14 @@ class Document
      * @param array  $slugs
      * @param array  $fragments
      */
-    public function __construct($id, $type, $href, $tags, $slugs, array $fragments)
-    {
+    public function __construct(
+        string $id,
+        string $type,
+        string $href,
+        ImmVector<string> $tags,
+        ImmVector<string> $slugs,
+        ImmMap<string, Fragment> $fragments
+    ) {
         $this->id = $id;
         $this->type = $type;
         $this->href = $href;
@@ -57,10 +63,10 @@ class Document
     /**
      * @return string
      */
-    public function getSlug()
+    public function getSlug(): string
     {
-        if (count($this->slugs) > 0) {
-            return $this->slugs[0];
+        if ($this->slugs->count() > 0) {
+            return $this->slugs->get(0);
         }
 
         return null;
@@ -71,13 +77,9 @@ class Document
      *
      * @return bool
      */
-    public function containsSlug($slug)
+    public function containsSlug($slug): bool
     {
-        $found = array_filter($this->slugs, function ($s) use ($slug) {
-            return $s == $slug;
-        });
-
-        return count($found) > 0;
+        return $this->slugs->toImmSet()->contains($slug);
     }
 
     /**

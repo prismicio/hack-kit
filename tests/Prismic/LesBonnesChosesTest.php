@@ -60,7 +60,6 @@ class LesBonnesChosesTest extends \PHPUnit_Framework_TestCase
     {
         $api = Api::get(self::$testRepository, self::$previewToken);
         $refs = $api->refs();
-        var_dump($refs);
         $future = $refs->at('Announcement of new SF shop');
         $results = $api->forms()->at("products")->ref($future->getRef())->submit();
         $this->assertEquals(count($results), 17);

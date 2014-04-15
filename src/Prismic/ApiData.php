@@ -1,7 +1,7 @@
 <?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -31,7 +31,7 @@ class ApiData
      * @param string    $oauth_token
      */
     public function __construct(
-        ImmVector<string> $refs,
+        ImmVector<Ref> $refs,
         ImmMap<string, string> $bookmarks,
         ImmMap<string, string> $types,
         ImmVector<string> $tags,
@@ -48,7 +48,7 @@ class ApiData
         $this->oauth_token = $oauth_token;
     }
 
-    public function getRefs(): ImmVector<string>
+    public function getRefs(): ImmVector<Ref>
     {
         return $this->refs;
     }

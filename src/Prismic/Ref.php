@@ -24,8 +24,12 @@ class Ref
      * @param boolean $isMasterRef
      * @param date $maybeScheduledAt
      */
-    public function __construct(string $ref, string $label, boolean $isMasterRef, ?string $maybeScheduledAt)
-    {
+    public function __construct(
+        string $ref,
+        string $label,
+        boolean $isMasterRef,
+        ?string $maybeScheduledAt
+    ) {
         $this->ref = $ref;
         $this->label = $label;
         $this->isMasterRef = $isMasterRef;
