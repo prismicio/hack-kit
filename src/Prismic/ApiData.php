@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -22,22 +22,22 @@ class ApiData
     private $oauth_token;
 
     /**
-     * @param array     $refs
-     * @param \stdClass $bookmarks
-     * @param \stdClass $types
-     * @param array     $tags
-     * @param \stdClass $forms
+     * @param ImmVector $refs
+     * @param ImmMap    $bookmarks
+     * @param ImmMap    $types
+     * @param ImmVector $tags
+     * @param ImmMap    $forms
      * @param string    $oauth_initiate
      * @param string    $oauth_token
      */
     public function __construct(
-        array $refs,
-        \stdClass $bookmarks,
-        \stdClass $types,
-        array $tags,
-        \stdClass $forms,
-        $oauth_initiate,
-        $oauth_token
+        ImmVector<string> $refs,
+        ImmMap<string, string> $bookmarks,
+        ImmMap<string, string> $types,
+        ImmVector<string> $tags,
+        ImmMap<string, Form> $forms,
+        string $oauth_initiate,
+        string $oauth_token
     ) {
         $this->refs = $refs;
         $this->bookmarks = $bookmarks;
@@ -48,37 +48,37 @@ class ApiData
         $this->oauth_token = $oauth_token;
     }
 
-    public function getRefs()
+    public function getRefs(): ImmVector<string>
     {
         return $this->refs;
     }
 
-    public function getBookmarks()
+    public function getBookmarks(): ImmMap<string, string>
     {
         return $this->bookmarks;
     }
 
-    public function getTypes()
+    public function getTypes(): ImmMap<string, string>
     {
         return $this->types;
     }
 
-    public function getTags()
+    public function getTags(): ImmVector<string>
     {
         return $this->tags;
     }
 
-    public function getForms()
+    public function getForms(): ImmMap<string, Form>
     {
         return $this->forms;
     }
 
-    public function getOauthInitiate()
+    public function getOauthInitiate(): string
     {
         return $this->oauth_initiate;
     }
 
-    public function getOauthToken()
+    public function getOauthToken(): string
     {
         return $this->oauth_token;
     }

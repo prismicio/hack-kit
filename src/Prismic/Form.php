@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -25,11 +25,17 @@ class Form
      * @param string    $method
      * @param string    $maybeRel
      * @param string    $enctype
-     * @param string    $action
-     * @param \stdClass $fields
+     * @param ImmMap    $action
+     * @param FieldForm $fields
      */
-    public function __construct($maybeName, $method, $maybeRel, $enctype, $action, $fields)
-    {
+    public function __construct(
+        ?string $maybeName,
+        string $method,
+        ?string $maybeRel,
+        string $enctype,
+        string $action,
+        ImmMap<string, FieldForm> $fields
+    ) {
         $this->maybeName = $maybeName;
         $this->method = $method;
         $this->maybeRel = $maybeRel;
@@ -38,50 +44,54 @@ class Form
         $this->fields = $fields;
     }
 
-    public function defaultData()
+    public function defaultData(): ImmMap<string, ImmVector<string>>
     {
-        $dft = array();
-        foreach ($this->fields as $key => $field) {
-            $default = $field->getDefaultValue();
-            if (isset($default)) {
-                if ($field->isMultiple()) {
-                    $dft[$key] = array($default);
-                } else {
-                    $dft[$key] = $default;
-                }
-            }
-        }
-
-        return $dft;
+        return $this->getFields()
+                    ->map($f ==> $f->getDefaultValue())
+                    ->filter($v ==> isset($v))
+                    ->map($value ==> new ImmVector(array($value)));
     }
 
-    public function getName()
+    public function getName(): ?string
     {
         return $this->maybeName;
     }
 
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->method;
     }
 
-    public function getRel()
+    public function getRel(): ?string
     {
         return $this->maybeRel;
     }
 
-    public function getEnctype()
+    public function getEnctype(): string
+
     {
         return $this->enctype;
     }
 
-    public function getAction()
+    public function getAction(): string
     {
         return $this->action;
     }
 
-    public function getFields()
+    public function getFields(): ImmMap<String, FieldForm>
     {
         return $this->fields;
+    }
+
+    public static function parse($json): Form
+    {
+        return new Form(
+            isset($json->{"name"}) ? $json->{"name"} : null,
+            $json->method,
+            isset($json->{"rel"}) ? $json->{"rel"} : null,
+            $json->enctype,
+            $json->action,
+            (new ImmMap((array)$json->fields))->map($data ==> FieldForm::parse($data))
+        );
     }
 }

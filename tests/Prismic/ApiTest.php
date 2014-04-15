@@ -55,8 +55,6 @@ class ApiTest extends \PHPUnit_Framework_TestCase
     {
         $forms = $api->forms();
 
-        $this->assertObjectHasAttribute('everything', $forms);
-
-//        $forms->everything->submit();
+        $this->assertNotNull($forms->get('everything'));
     }
 }

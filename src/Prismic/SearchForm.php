@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -18,43 +18,49 @@ class SearchForm
     private $data;
 
     /**
-     * @param Api   $client
-     * @param Form  $form
-     * @param array $data
+     * @param Api    $client
+     * @param Form   $form
+     * @param ImmMap $data
      */
-    public function __construct(Api $api, Form $form, array $data)
+    public function __construct(Api $api, Form $form, ImmMap<string, ImmVector<string>> $data)
     {
         $this->api  = $api;
         $this->form = $form;
         $this->data = $data;
     }
 
-    public function set($key, $value)
+    public function set(string $key, string $value): SearchForm
     {
-        if (isset($key) && isset($value)) {
-            $fields = $this->form->getFields();
-            $field = $fields[$key];
-
-            if (is_int($value) && $field->getType() != "Integer") {
-                throw new \RuntimeException("Cannot use a Int as value for field " . $key);
-            } else {
-                $data = $this->data;
-                if ($field->isMultiple()) {
-                    $values = isset($data[$key]) ? $data[$key] : array();
-                    if (is_array($values)) {
-                        array_push($values, $value);
-                    } else {
-                        $values = array($value);
-                    }
-                    $data[$key] = $values;
-                } else {
-                    $data[$key] = $value;
+        $maybeField = $this->form->getFields()->get($key);
+        if(isset($maybeField)) {
+            $values = new Vector(array($value));
+            if($maybeField->isMultiple()) {
+                $alreadyThere = $this->data->get($key);
+                if(isset($alreadyThere)) {
+                    $values->addAll($alreadyThere);
                 }
             }
-
-            return new SearchForm($this->api, $this->form, $data);
+            return new SearchForm(
+                clone $this->api,
+                clone $this->form,
+                $this->data->toMap()->add(Pair{$key, $values})->toImmMap()
+            );
         } else {
-            return null;
+            throw new \RuntimeException("Unknown field " . $field);
+        }
+    }
+
+    public function setInt(string $key, int $value)
+    {
+        $maybeField = $this->$form->getFields()->get($key);
+        if(isset($maybeField)) {
+            if($maybeField->type == 'Integer') {
+                $this->set($key, $value->toString());
+            } else {
+                throw new \RuntimeException("Cannot use a int as value for the field" . $field . "of type"  . $field->type);
+            }
+        } else {
+            throw new \RuntimeException("Unknown field " . $field);
         }
     }
 
@@ -65,7 +71,7 @@ class SearchForm
      *
      * @return SearchForm
      */
-    public function ref($ref)
+    public function ref(string $ref): SearchForm
     {
         return $this->set("ref", $ref);
     }
@@ -76,26 +82,31 @@ class SearchForm
      * @param  int        $pageSize
      * @return SearchForm
      */
-    public function pageSize($pageSize)
+    public function pageSize(int $pageSize): SearchForm
     {
-        $data = $this->data;
-        $data['pageSize'] = $pageSize;
-
-        return new SearchForm($this->api, $this->form, $data);
+        return $this->setInt("pageSize", $pageSize);
     }
 
     /**
      * Set the repository page
      *
-     * @param  int        $page
+     * @param  int $page
      * @return SearchForm
      */
-    public function page($page)
+    public function page(int $page): SearchForm
     {
-        $data = $this->data;
-        $data['page'] = $page;
+        return $this->setInt("page", $page);
+    }
 
-        return new SearchForm($this->api, $this->form, $data);
+    /**
+     * Set orderings
+     *
+     * @param  string $orderings
+     * @return SearchForm
+     */
+    public function orderings(string $orderings): SearchForm
+    {
+        return $this->setInt("orderings", $orderings);
     }
 
     /**
@@ -107,9 +118,7 @@ class SearchForm
      */
     private static function parseResult($json)
     {
-        return array_map(function ($doc) {
-            return Document::parse($doc);
-        }, isset($json->results) ? $json->results : $json);
+        return array_map($doc ==> Document::parse($doc), isset($json->results) ? $json->results : $json);
     }
 
     /**
@@ -135,7 +144,7 @@ class SearchForm
      *
      * @throws \RuntimeException
      */
-    public function count()
+    public function count(): int
     {
         return $this->pageSize(1)->submit_raw()->total_results_size;
     }
@@ -152,7 +161,7 @@ class SearchForm
      *
      * @return SearchForm
      */
-    public function query($q)
+    public function query(string $q): SearchForm
     {
         $fields = $this->form->getFields();
         $field = $fields['q'];
@@ -205,7 +214,7 @@ class SearchForm
      *
      * @return string
      */
-    private static function strip($str)
+    private static function strip(string $str): string
     {
         $trimmed = trim($str);
         $drop1 = substr($trimmed, 1, strlen($trimmed));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -20,10 +20,10 @@ class Api
     protected $data;
 
     /**
-     * @param string $data
+     * @param ApiData $data
      * @param string $accessToken
      */
-    private function __construct($data, $accessToken = null)
+    private function __construct(ApiData $data, ?string $accessToken)
     {
         $this->data        = $data;
         $this->accessToken = $accessToken;
@@ -34,7 +34,7 @@ class Api
      *
      * @return array
      */
-    public function refs()
+    public function refs(): ImmMap<string, Ref>
     {
         $refs = $this->data->getRefs();
         $groupBy = array();
@@ -48,7 +48,7 @@ class Api
             }
         }
 
-        $results = array();
+        $results = ImmMap<string, Ref>();
         foreach ($groupBy as $label => $values) {
             $results[$label] = $values[0];
         }
@@ -56,18 +56,14 @@ class Api
         return $results;
     }
 
-    public function bookmarks()
+    public function bookmarks(): ImmMap<string, string>
     {
         return $this->data->getBookmarks();
     }
 
-    public function bookmark($name)
+    public function bookmark($name): ?string
     {
-        if (isset($this->bookmarks()->{$name})) {
-            return $this->bookmarks()->{$name};
-        }
-
-        return null;
+        return $this->bookmarks()->get($name);
     }
 
     /**
@@ -75,13 +71,9 @@ class Api
      *
      * @return string
      */
-    public function master()
+    public function master(): Ref
     {
-        $masters = array_filter($this->data->getRefs(), function ($ref) {
-            return $ref->isMasterRef() == true;
-        });
-
-        return $masters[0];
+        return $this->data->getRefs()->filter($ref ==> $ref->isMasterRef())->at(0);
     }
 
     /**
@@ -89,39 +81,15 @@ class Api
      *
      * @return mixed
      */
-    public function forms()
+    public function forms(): ImmMap<string, SearchForm>
     {
-        $forms = $this->data->getForms();
-        $rforms = new \stdClass();
-        foreach ($forms as $key => $form) {
-
-            $fields = array();
-            foreach ($form->fields as $name => $field) {
-                $maybeDefault = isset($field->default) ? $field->default : null;
-                $isMultiple = isset($field->multiple) ? $field->multiple : false;
-                $fields[$name] = new FieldForm($field->type, $isMultiple, $maybeDefault);
-            }
-
-            $f = new Form(
-                isset($form->name) ? $form->name : null,
-                $form->method,
-                isset($form->rel) ? $form->rel : null,
-                $form->enctype,
-                $form->action,
-                $fields
-            );
-
-            $data = $f->defaultData();
-            $rforms->$key = new SearchForm($this, $f, $data);
-        }
-
-        return $rforms;
+        return $this->data->getForms()->map($form ==> new SearchForm($this, $form, $form->defaultData()));
     }
 
     /**
      * @return string
      */
-    public function oauthInitiateEndpoint()
+    public function oauthInitiateEndpoint(): string
     {
         return $this->data->getOauthInitiate();
     }
@@ -129,12 +97,12 @@ class Api
     /**
      * @return string
      */
-    public function oauthTokenEndpoint()
+    public function oauthTokenEndpoint(): string
     {
         return $this->data->getOauthToken();
     }
 
-    public function getData()
+    public function getData(): ApiData
     {
         return $this->data;
     }
@@ -144,10 +112,10 @@ class Api
      *
      * @param string $action
      * @param string $accessToken
-     *
+     * @param Client $client
      * @return Api
      */
-    public static function get($action, $accessToken = null, $client = null)
+    public static function get(string $action, string $accessToken=null, Client $client=null): Api
     {
         $url = $action . ($accessToken ? '?access_token=' . $accessToken : '');
         $client = isset($client) ? $client : self::defaultClient();
@@ -161,16 +129,11 @@ class Api
         }
 
         $apiData = new ApiData(
-            array_map(
-                function ($ref) {
-                    return Ref::parse($ref);
-                },
-                $response->refs
-            ),
-            $response->bookmarks,
-            $response->types,
-            $response->tags,
-            $response->forms,
+            (new ImmVector($response->refs))->map($ref ==> Ref::parse($ref)),
+            new ImmMap((array)$response->bookmarks),
+            new ImmMap((array)$response->types),
+            new ImmVector($response->tags),
+            (new ImmMap((array)$response->forms))->map($data ==> Form::parse($data)),
             $response->oauth_initiate,
             $response->oauth_token
         );
@@ -178,7 +141,7 @@ class Api
         return new Api($apiData, $accessToken);
     }
 
-    public static function defaultClient()
+    public static function defaultClient(): Client
     {
         return new Client('', array(
             Client::CURL_OPTIONS => array(

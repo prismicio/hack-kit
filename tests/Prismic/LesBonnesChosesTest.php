@@ -21,7 +21,7 @@ class LesBonnesChosesTest extends \PHPUnit_Framework_TestCase
     {
         $api = Api::get(self::$testRepository);
         $masterRef = $api->master()->getRef();
-        $results = $api->forms()->everything->ref($masterRef)->submit();
+        $results = $api->forms()->at("everything")->ref($masterRef)->submit();
         $this->assertEquals(count($results), 20);
     }
 
@@ -29,7 +29,7 @@ class LesBonnesChosesTest extends \PHPUnit_Framework_TestCase
     {
         $api = Api::get(self::$testRepository);
         $masterRef = $api->master()->getRef();
-        $results = $api->forms()->everything->ref($masterRef)->query('[[:d = at(document.type, "product")]]')->submit();
+        $results = $api->forms()->at("everything")->ref($masterRef)->query('[[:d = at(document.type, "product")]]')->submit();
         $this->assertEquals(count($results), 16);
     }
 
@@ -37,7 +37,7 @@ class LesBonnesChosesTest extends \PHPUnit_Framework_TestCase
     {
         $api = Api::get(self::$testRepository);
         $masterRef = $api->master()->getRef();
-        $results = $api->forms()->products->ref($masterRef)->submit();
+        $results = $api->forms()->at("products")->ref($masterRef)->submit();
         $this->assertEquals(count($results), 16);
     }
 
@@ -45,7 +45,7 @@ class LesBonnesChosesTest extends \PHPUnit_Framework_TestCase
     {
         $api = Api::get(self::$testRepository);
         $masterRef = $api->master()->getRef();
-        $results = $api->forms()->products->ref($masterRef)->query('[[:d = at(my.product.flavour, "Chocolate")]]')->submit();
+        $results = $api->forms()->at("products")->ref($masterRef)->query('[[:d = at(my.product.flavour, "Chocolate")]]')->submit();
         $this->assertEquals(count($results), 5);
     }
 
@@ -60,8 +60,9 @@ class LesBonnesChosesTest extends \PHPUnit_Framework_TestCase
     {
         $api = Api::get(self::$testRepository, self::$previewToken);
         $refs = $api->refs();
-        $future = $refs['Announcement of new SF shop'];
-        $results = $api->forms()->products->ref($future->getRef())->submit();
+        var_dump($refs);
+        $future = $refs->at('Announcement of new SF shop');
+        $results = $api->forms()->at("products")->ref($future->getRef())->submit();
         $this->assertEquals(count($results), 17);
     }
 }

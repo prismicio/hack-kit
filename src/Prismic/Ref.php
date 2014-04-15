@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -21,10 +21,10 @@ class Ref
     /**
      * @param string $ref
      * @param string $label
-     * @param string $isMasterRef
-     * @param string $maybeScheduledAt
+     * @param boolean $isMasterRef
+     * @param date $maybeScheduledAt
      */
-    public function __construct($ref, $label, $isMasterRef, $maybeScheduledAt = null)
+    public function __construct(string $ref, string $label, boolean $isMasterRef, ?string $maybeScheduledAt)
     {
         $this->ref = $ref;
         $this->label = $label;
@@ -32,17 +32,17 @@ class Ref
         $this->maybeScheduledAt = $maybeScheduledAt;
     }
 
-    public function getRef()
+    public function getRef(): string
     {
         return $this->ref;
     }
 
-    public function getLabel()
+    public function getLabel(): string
     {
         return $this->label;
     }
 
-    public function isMasterRef()
+    public function isMasterRef(): boolean
     {
         return $this->isMasterRef;
     }
@@ -52,7 +52,7 @@ class Ref
         return $this->maybeScheduledAt;
     }
 
-    public static function parse($json)
+    public static function parse($json): Ref
     {
         return new Ref(
             $json->ref,

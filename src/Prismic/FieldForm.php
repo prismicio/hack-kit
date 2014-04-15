@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -19,28 +19,38 @@ class FieldForm
     private $defaultValue;
 
     /**
-     * @param string $type
-     * @param string $defaultValue
+     * @param string  $type
+     * @param boolean $multiple
+     * @param string  $defaultValue
      */
-    public function __construct($type, $mutiple, $defaultValue)
+    public function __construct(string $type, boolean $mutiple, ?string $defaultValue)
     {
         $this->type = $type;
         $this->multiple = $mutiple;
         $this->defaultValue = $defaultValue;
     }
 
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
-    public function getDefaultValue()
+    public function getDefaultValue(): ?string
     {
         return $this->defaultValue;
     }
 
-    public function isMultiple()
+    public function isMultiple(): boolean
     {
         return $this->multiple;
+    }
+
+    public static function parse($json): FieldForm
+    {
+        return new FieldForm(
+            $json->type,
+            isset($json->{"multiple"}) ? $json->{"multiple"} : false,
+            isset($json->{"default"}) ? $json->{"default"} : null
+        );
     }
 }
