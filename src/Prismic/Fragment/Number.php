@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -15,27 +15,26 @@ class Number implements FragmentInterface
 {
     private $value;
 
-    public function __construct($value)
+    public function __construct(double $value)
     {
         $this->value = $value;
     }
 
-    public function format($pattern)
+    public function asText(string $pattern): string
     {
         return sprintf($pattern, $this->value);
     }
 
-    public function asText()
-    {
-        return $this->getValue();
+    public function asInt(): int {
+        return (int)$this->value;
     }
 
-    public function asHtml($linkResolver = null)
+    public function asHtml($linkResolver = null): string
     {
         return '<span class="number">' . $this->value . '</span>';
     }
 
-    public function getValue()
+    public function getValue(): double
     {
         return $this->value;
     }

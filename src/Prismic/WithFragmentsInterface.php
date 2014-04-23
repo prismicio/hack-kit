@@ -9,14 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Prismic\Fragment;
+namespace Prismic;
 
-interface FragmentInterface
-{
-    /**
-     * Return the value of the fagment as HTML.
-     *
-     * @return string
-     */
-    public function asHtml($linkResolver): string;
+interface WithFragmentsInterface {
+
+    public function fragments(): ImmMap<string, Fragment>;
 }
+

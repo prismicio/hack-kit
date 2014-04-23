@@ -80,7 +80,7 @@ class Document implements WithFragmentsInterface
         return $this->slugs->toImmSet()->contains($slug);
     }
 
-    public static function parseFragment(\stdClass $json): ?FragmentInterface
+    public static function parseFragment($json): ?FragmentInterface
     {
         if (is_object($json) && property_exists($json, "type")) {
             if ($json->type === "Image") {
@@ -144,26 +144,36 @@ class Document implements WithFragmentsInterface
 
     public static function parse(\stdClass $json): Document
     {
-        $fragments = array();
+        $fragments = new Map<string, FragmentInterface>();
         foreach ($json->data as $type => $fields) {
             foreach ($fields as $key => $value) {
                 if (is_array($value)) {
                     for ($i = 0; $i < count($value); $i++) {
                         $f = self::parseFragment($value[$i]);
                         if (isset($f)) {
-                            $fragments[$type . '.' . $key . '[' . $i . ']'] = $f;
+                            $fragments->set($type . '.' . $key . '[' . $i . ']', $f);
                         }
                     }
-                }
-                $fragment = self::parseFragment($value);
-
-                if (isset($fragment)) {
-                    $fragments[$type . "." . $key] = $fragment;
+                } else {
+                    $f = self::parseFragment($value);
+                    if($key == 'price') {
+                        //var_dump($f);
+                    }
+                    if (isset($f)) {
+                        $fragments->set($type . '.' . $key, $f);
+                    }
                 }
             }
         }
 
-        return new Document($json->id, $json->type, $json->href, $json->tags, $json->slugs, $fragments);
+        return new Document(
+            $json->id,
+            $json->type,
+            $json->href,
+            new ImmVector($json->tags),
+            new ImmVector($json->slugs),
+            $fragments->toImmMap()
+        );
     }
 
     public function getId(): string

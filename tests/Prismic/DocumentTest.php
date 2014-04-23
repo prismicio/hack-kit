@@ -41,7 +41,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
     public function testGetNumber()
     {
         $this->assertEquals($this->document->getNumber('product.price')->getValue(), 2.5);
-        $this->assertEquals($this->document->getNumber('product.price', '%s'), '2.5');
+        $this->assertEquals($this->document->getNumberAs('product.price', '%s'), '2.5');
     }
 
     public function testGetBoolean()
@@ -57,7 +57,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
     public function testGetDate()
     {
         $this->assertEquals($this->document->getDate('product.birthdate')->getValue(), '2013-10-23');
-        $this->assertEquals($this->document->getDate('product.birthdate', 'Y'), '2013');
+        $this->assertEquals($this->document->getDateAs('product.birthdate', 'Y'), '2013');
     }
 
     public function testGetImage()

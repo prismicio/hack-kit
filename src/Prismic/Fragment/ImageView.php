@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -21,7 +21,7 @@ class ImageView
     private $width;
     private $height;
 
-    public function __construct($url, $alt, $copyright, $width, $height)
+    public function __construct(string $url, string $alt, string $copyright, int $width, int $height)
     {
         $this->url = $url;
         $this->alt = $alt;
@@ -47,37 +47,37 @@ class ImageView
         return trim($doc->saveHTML()); // trim removes trailing newline
     }
 
-    public function ratio()
+    public function ratio(): double
     {
         return $this->width / $this->height;
     }
 
-    public function getUrl()
+    public function getUrl(): string
     {
         return $this->url;
     }
 
-    public function getAlt()
+    public function getAlt(): string
     {
         return $this->alt;
     }
 
-    public function getCopyright()
+    public function getCopyright(): string
     {
         return $this->copyright;
     }
 
-    public function getWidth()
+    public function getWidth(): int
     {
         return $this->width;
     }
 
-    public function getHeight()
+    public function getHeight(): int
     {
         return $this->height;
     }
 
-    public static function parse($json)
+    public static function parse($json): ImageView
     {
         return new ImageView(
             $json->url,
