@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -12,20 +12,23 @@
 namespace Prismic\Fragment;
 
 use Prismic\Document;
+use Prismic\LinkResolver;
+use Prismic\Fragment\GroupDoc;
+use Prismic\Fragment\FragmentInterface;
 
 class Group implements FragmentInterface
 {
-    private $array;
+    private $docs;
 
-    public function __construct($array)
+    public function __construct(ImmVector<Pair<string, FragmentInterface>> $docs)
     {
-        $this->array = $array;
+        $this->docs = $docs;
     }
 
-    public function asHtml($linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
         $string = "";
-        foreach ($this->array as $subfragments) {
+        foreach ($this->docs as $subfragments) {
             foreach ($subfragments as $subfragment_name => $subfragment) {
                 $string .= "<section data-field=\"$subfragment_name\">" .
                            $subfragment->asHtml($linkResolver) .
@@ -35,7 +38,7 @@ class Group implements FragmentInterface
         return $string;
     }
 
-    public function asText()
+    public function asText(): string
     {
         $string = "";
         foreach ($this->array as $subfragments) {
@@ -46,33 +49,32 @@ class Group implements FragmentInterface
         return $string;
     }
 
-    public function getArray()
+    public function getDocs(): ImmVector<Pair<string, FragmentInterface>>
     {
-        return $this->array;
+        return $this->docs;
     }
 
-    public static function parseSubfragmentList($json)
+    public static function parseSubfragments(\stdClass $json): ImmMap<string, FragmentInterface>
     {
-        $subfragments = array();
-        foreach ($json as $subfragment_name => $subfragmentJson) {
-            $subfragment = Document::parseFragment($subfragmentJson);
-            if (isset($subfragment)) {
-                $subfragments[$subfragment_name] = $subfragment;
-            }
-        }
-        return $subfragments;
-    }
-
-    public static function parse($json)
-    {
-        $array = array();
-        foreach ($json as $subfragmentListJson) {
-            $subfragmentList = Group::parseSubfragmentList($subfragmentListJson);
-            if (isset($subfragmentList)) {
-                array_push($array, $subfragmentList);
+        $subfragments = new Map<string, FragmentInterface>();
+        foreach ($json as $name => $value) {
+            $f = Document::parseFragment($value);
+            if (isset($f)) {
+                $subfragments->add(Pair { $name, $f });
             }
         }
 
-        return new Group($array);
+        return $subfragments->toImmMap();
+    }
+
+    public static function parse(array $json): Group
+    {
+        $results = new Vector<ImmMap<string, FragmentInterface>>();
+        foreach ($json as $subfragments) {
+            $fs = Group::parseSubfragments($subfragments);
+            $results->add($fs);
+        }
+
+        return new Group($results->toImmVector());
     }
 }

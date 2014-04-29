@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -10,6 +10,8 @@
  */
 
 namespace Prismic\Fragment;
+
+use Prismic\LinkResolver;
 
 class Embed implements FragmentInterface
 {
@@ -22,8 +24,15 @@ class Embed implements FragmentInterface
     private $maybeHtml;
     private $oembedJson;
 
-    public function __construct($type, $provider, $url, $maybeWidth, $maybeHeigth, $maybeHtml, $oembedJson)
-    {
+    public function __construct(
+        string $type,
+        string $provider,
+        string $url,
+        ?int $maybeWidth,
+        ?int $maybeHeigth,
+        ?string $maybeHtml,
+        \stdClass $oembedJson
+    ) {
         $this->type = $type;
         $this->provider = $provider;
         $this->url = $url;
@@ -33,7 +42,7 @@ class Embed implements FragmentInterface
         $this->oembedJson = $oembedJson;
     }
 
-    public function asHtml($linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null)
     {
         if (isset($this->maybeHtml)) {
             return '<div data-oembed="' . $this->url . '" data-oembed-type="' .
@@ -44,19 +53,14 @@ class Embed implements FragmentInterface
         }
     }
 
-    public function asText()
-    {
-        return $this->url;
-    }
-
-    public static function parse($json)
+    public static function parse(\stdClass $json): Embed
     {
         return new Embed(
             $json->oembed->type,
             $json->oembed->provider_name,
             $json->oembed->embed_url,
-            $json->oembed->width,
-            $json->oembed->height,
+            (int)$json->oembed->width,
+            (int)$json->oembed->height,
             $json->oembed->html,
             $json->oembed
         );

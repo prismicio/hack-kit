@@ -80,7 +80,7 @@ class Document implements WithFragmentsInterface
         return $this->slugs->toImmSet()->contains($slug);
     }
 
-    public static function parseFragment($json): ?FragmentInterface
+    public static function parseFragment(\stdClass $json): ?FragmentInterface
     {
         if (is_object($json) && property_exists($json, "type")) {
             if ($json->type === "Image") {
@@ -156,9 +156,6 @@ class Document implements WithFragmentsInterface
                     }
                 } else {
                     $f = self::parseFragment($value);
-                    if($key == 'price') {
-                        //var_dump($f);
-                    }
                     if (isset($f)) {
                         $fragments->set($type . '.' . $key, $f);
                     }

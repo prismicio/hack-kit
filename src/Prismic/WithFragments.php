@@ -27,11 +27,7 @@ use Prismic\LinkResolver;
 trait WithFragments {
     require implements WithFragmentsInterface;
 
-    private function indexedKey(string $key): ?(string, int) {
-        
-    }
-
-    public function has($field): boolean
+    public function has(string $field): bool
     {
         return $this->fragments->containsKey($field);
     }
@@ -240,8 +236,7 @@ trait WithFragments {
     {
         $html = null;
         foreach ($this->fragments as $field => $v) {
-            $html = $html . '<section data-field="' . $field . '">' .
-                    $this->getHtml($field, $linkResolver) . '</section>';
+            $html = $html . '<section data-field="' . $field . '">' . $this->getHtml($field, $linkResolver) . '</section>';
         };
 
         return $html;

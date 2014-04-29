@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -11,38 +11,31 @@
 
 namespace Prismic\Fragment;
 
+use Prismic\Fragment\Block\BlockInterface;
+
 class BlockGroup
 {
     private $maybeTag;
     private $blocks;
 
-    public function __construct($maybeTag, $blocks)
+    public function __construct(?string $maybeTag, ImmVector<BlockInterface> $blocks)
     {
         $this->maybeTag = $maybeTag;
         $this->blocks = $blocks;
     }
 
-    public function asText()
+    public function addBlock($block): BlockGroup
     {
-        return null;
+        $updated = $this->blocks->toVector()->add($block);
+        return new BlockGroup($this->maybeTag, $updated->toImmVector());
     }
 
-    public function asHtml($linkResolver = null)
-    {
-        return null;
-    }
-
-    public function addBlock($block)
-    {
-        array_push($this->blocks, $block);
-    }
-
-    public function getTag()
+    public function getTag(): ?string
     {
         return $this->maybeTag;
     }
 
-    public function getBlocks()
+    public function getBlocks(): ImmVector<BlockInterface>
     {
         return $this->blocks;
     }

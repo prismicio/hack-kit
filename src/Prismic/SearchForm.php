@@ -11,6 +11,8 @@
 
 namespace Prismic;
 
+use Prismic\Document;
+
 class SearchForm
 {
     private $api;
@@ -114,11 +116,11 @@ class SearchForm
      *
      * @param $results
      *
-     * @return array
+     * @return ImmVector
      */
-    private static function parseResult($json)
+    private static function parseResult(\stdClass $json): ImmVector<Document>
     {
-        return array_map($doc ==> Document::parse($doc), isset($json->results) ? $json->results : $json);
+        return (new ImmVector($json->results))->map($doc ==> Document::parse($doc));
     }
 
     /**
@@ -128,7 +130,7 @@ class SearchForm
      *
      * @throws \RuntimeException
      */
-    public function submit()
+    public function submit(): ImmVector<Document>
     {
         return self::parseResult($this->submit_raw());
     }
@@ -184,7 +186,7 @@ class SearchForm
      *
      * @return the raw (unparsed) response
      */
-    private function submit_raw()
+    private function submit_raw(): \stdClass
     {
         if ($this->form->getMethod() == 'GET' &&
             $this->form->getEnctype() == 'application/x-www-form-urlencoded' &&

@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -11,37 +11,35 @@
 
 namespace Prismic\Fragment;
 
+use Prismic\LinkResolver;
+
 class Date implements FragmentInterface
 {
     private $value;
 
-    public function __construct($value)
+    public function __construct(string $value)
     {
         $this->value = $value;
     }
 
-    public function asHtml($linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null)
     {
         return '<time>' . $this->value . '</time>';
     }
 
-    public function asText()
+    public function asText(): string
     {
         return $this->value;
     }
 
-    public function formatted($pattern)
+    public function formatted(string $pattern): string
     {
         return date($pattern, $this->asEpoch());
     }
 
-    public function asEpoch()
+    public function asEpoch(): int
     {
         return strtotime($this->value);
     }
 
-    public function getValue()
-    {
-        return $this->value;
-    }
 }

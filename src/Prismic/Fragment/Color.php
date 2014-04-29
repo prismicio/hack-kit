@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -11,26 +11,23 @@
 
 namespace Prismic\Fragment;
 
+use Prismic\LinkResolver;
+
 class Color implements FragmentInterface
 {
     private $hex;
 
-    public function __construct($hex)
+    public function __construct(string $hex)
     {
         $this->hex = $hex;
     }
 
-    public function asHtml($linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null)
     {
         return '<span class="color">' . $this->hex . '</span>';
     }
 
-    public function asText()
-    {
-        return $this->getHexValue();
-    }
-
-    public function getHexValue()
+    public function getHexValue(): string
     {
         return $this->hex;
     }

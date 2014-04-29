@@ -11,6 +11,7 @@
 
 namespace Prismic\Fragment;
 
+use Prismic\LinkResolver;
 use Prismic\Fragment\Block\EmbedBlock;
 use Prismic\Fragment\Block\HeadingBlock;
 use Prismic\Fragment\Block\ImageBlock;
@@ -41,7 +42,7 @@ class StructuredText implements FragmentInterface
         return $this->blocks;
     }
 
-    public function asText()
+    public function asText(): string
     {
         $result = array_map(function ($block) {
             return $block->getText();
@@ -50,7 +51,7 @@ class StructuredText implements FragmentInterface
         return join("\n\n", $result);
     }
 
-    public function getFirstPreformatted()
+    public function getFirstPreformatted(): ?PreformattedBlock
     {
         foreach ($this->blocks as $block) {
             if (isset($block) && $block instanceof PreformattedBlock) {
@@ -59,7 +60,7 @@ class StructuredText implements FragmentInterface
         }
     }
 
-    public function getFirstParagraph()
+    public function getFirstParagraph(): ?ParagraphBlock
     {
         foreach ($this->blocks as $block) {
             if (isset($block) && $block instanceof ParagraphBlock) {
@@ -68,7 +69,7 @@ class StructuredText implements FragmentInterface
         }
     }
 
-    public function getFirstImage()
+    public function getFirstImage(): ?ImageBlock
     {
         foreach ($this->blocks as $block) {
             if (isset($block) && $block instanceof ImageBlock) {
@@ -77,9 +78,9 @@ class StructuredText implements FragmentInterface
         }
     }
 
-    public function asHtml($linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
-        $groups = array();
+        $groups = new Vector<BlockGroup>();
         foreach ($this->blocks as $block) {
             $count = count($groups);
             if ($count > 0) {
@@ -89,24 +90,20 @@ class StructuredText implements FragmentInterface
                 } elseif ('ol' == $lastOne->getTag() && ($block instanceof ListItemBlock) && $block->isOrdered()) {
                     $lastOne->addBlock($block);
                 } elseif (($block instanceof ListItemBlock) && !$block->isOrdered()) {
-                    $newBlockGroup = new BlockGroup("ul", array());
-                    $newBlockGroup->addBlock($block);
-                    array_push($groups, $newBlockGroup);
+                    $newBlockGroup = new BlockGroup("ul", new ImmVector(array($block)));
+                    $groups->add($newBlockGroup);
                 } else {
                     if (($block instanceof ListItemBlock) && $block->isOrdered()) {
-                        $newBlockGroup = new BlockGroup("ol", array());
-                        $newBlockGroup->addBlock($block);
-                        array_push($groups, $newBlockGroup);
+                        $newBlockGroup = new BlockGroup("ol", new ImmVector(array($block)));
+                        $groups->add($newBlockGroup);
                     } else {
-                        $newBlockGroup = new BlockGroup(null, array());
-                        $newBlockGroup->addBlock($block);
-                        array_push($groups, $newBlockGroup);
+                        $newBlockGroup = new BlockGroup(null, new ImmVector(array($block)));
+                        $groups->add($newBlockGroup);
                     }
                 }
             } else {
-                $newBlockGroup = new BlockGroup(null, array());
-                $newBlockGroup->addBlock($block);
-                array_push($groups, $newBlockGroup);
+                $newBlockGroup = new BlockGroup(null, new ImmVector(array($block)));
+                $groups->add($newBlockGroup);
             }
         }
         $html = "";
@@ -128,7 +125,7 @@ class StructuredText implements FragmentInterface
         return $html;
     }
 
-    public static function asHtmlBlock($block, $linkResolver = null)
+    public static function asHtmlBlock(BlockInterface $block, ?LinkResolver $linkResolver = null)
     {
         if ($block instanceof HeadingBlock) {
             return nl2br('<h' . $block->getLevel() . '>' .
@@ -145,15 +142,13 @@ class StructuredText implements FragmentInterface
         } elseif ($block instanceof EmbedBlock) {
             return nl2br($block->getObj()->asHtml());
         } elseif ($block instanceof PreformattedBlock) {
-            return '<pre>' .
-                   StructuredText::asHtmlText($block->getText(), $block->getSpans(), $linkResolver) .
-                   '</pre>';
+            return '<pre>' . StructuredText::asHtmlText($block->getText(), $block->getSpans(), $linkResolver) .'</pre>';
         }
 
         return "";
     }
 
-    public static function asHtmlText($text, $spans, $linkResolver = null)
+    public static function asHtmlText($text, $spans, ?LinkResolver $linkResolver = null): string
     {
         if (empty($spans)) {
             return htmlspecialchars($text);
@@ -163,15 +158,11 @@ class StructuredText implements FragmentInterface
         $doc->appendChild($doc->createTextNode($text));
 
         $iterateChildren = function ($node, $start, $span) use (&$iterateChildren, $linkResolver) {
-            // Get length of node's text content
             $nodeLength = mb_strlen($node->textContent);
 
             // If this is a text node we have found the right node
             if ($node instanceof \DOMText) {
                 if ($span->getEnd() - $span->getStart() > $nodeLength) {
-                    // The span is too long for the node -- we have improperly
-                    // nested spans
-                    //throw new \Exception("Improperly nested span of type " . get_class($span) . " starting at offset {$span->getStart()}");
                     return;
                 }
 
@@ -193,7 +184,6 @@ class StructuredText implements FragmentInterface
                         $attributes['href'] = $span->getLink()->getUrl();
                     }
                 } else {
-                    //throw new \Exception("Unknown span type " . get_class($span));
                     $nodeName = 'span';
                 }
 
@@ -233,7 +223,6 @@ class StructuredText implements FragmentInterface
 
         foreach ($spans as $span) {
             if ($span->getEnd() < $span->getStart()) {
-                //throw new \Exception("Span of type " . get_class($span) . " starting at {$span->getStart()} ends at {$span->getEnd()} (before it begins)");
                 continue;
             }
             $iterateChildren($doc, 0, $span);
@@ -243,7 +232,7 @@ class StructuredText implements FragmentInterface
 
     }
 
-    public static function parseSpan($json): ?SpanInterface
+    public static function parseSpan(\stdClass $json): ?SpanInterface
     {
         $type = $json->type;
         $start = $json->start;

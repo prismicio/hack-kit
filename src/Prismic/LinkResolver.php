@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -10,6 +10,9 @@
  */
 
 namespace Prismic;
+
+use Prismic\Document;
+use Prismic\Fragment\Link\DocumentLink;
 
 /**
  * The LinkResolver convert Prismic.io's links into Application's ones.
@@ -24,7 +27,7 @@ abstract class LinkResolver
      *
      * @return String
      */
-    abstract public function resolve($link);
+    abstract public function resolve(DocumentLink $link): string;
 
     public function __invoke($link)
     {
@@ -38,7 +41,7 @@ abstract class LinkResolver
      *
      * @return String
      */
-    public function resolveDocument($document)
+    public function resolveDocument(Document $document): string
     {
         return $this->resolve($this->asLink($document));
     }
@@ -50,7 +53,7 @@ abstract class LinkResolver
      *
      * @return String
      */
-    public function resolveLink($link)
+    public function resolveLink(DocumentLink $link): string
     {
         return $this->resolve($link);
     }
@@ -64,7 +67,7 @@ abstract class LinkResolver
      *
      * @return true if the given document corresponds to the given bookmark
      */
-    public function isBookmarkDocument($api, $document, $bookmark)
+    public function isBookmarkDocument(Api $api, Document $document, string $bookmark): bool
     {
         return $this->isBookmark($api, $this->asLink($document), $bookmark);
     }
@@ -78,7 +81,7 @@ abstract class LinkResolver
      *
      * @return true if the given document corresponds to the given bookmark
      */
-    public function isBookmark($api, $link, $bookmark)
+    public function isBookmark(Api $api, DocumentLink $link, string $bookmark): bool
     {
         $maybeId = $api->bookmark($bookmark);
         if ($maybeId == $link->getId()) {
@@ -95,9 +98,9 @@ abstract class LinkResolver
      *
      * @return Fragment\Link\DocumentLink The document link
      */
-    private function asLink($document)
+    private function asLink(Document $document): DocumentLink
     {
-        return new Fragment\Link\DocumentLink(
+        return new DocumentLink(
             $document->getId(),
             $document->getType(),
             $document->getTags(),

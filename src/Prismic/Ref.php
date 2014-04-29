@@ -51,7 +51,7 @@ class Ref
         return $this->isMasterRef;
     }
 
-    public function getScheduledAt()
+    public function getScheduledAt(): ?string
     {
         return $this->maybeScheduledAt;
     }

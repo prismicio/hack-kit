@@ -55,7 +55,7 @@ class Api
         return $this->data->getBookmarks();
     }
 
-    public function bookmark($name): ?string
+    public function bookmark(string $name): ?string
     {
         return $this->bookmarks()->get($name);
     }

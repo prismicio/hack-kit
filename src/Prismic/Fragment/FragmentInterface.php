@@ -13,10 +13,4 @@ namespace Prismic\Fragment;
 
 interface FragmentInterface
 {
-    /**
-     * Return the value of the fagment as HTML.
-     *
-     * @return string
-     */
-    public function asHtml($linkResolver): string;
 }

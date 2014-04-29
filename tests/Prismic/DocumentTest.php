@@ -56,7 +56,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
 
     public function testGetDate()
     {
-        $this->assertEquals($this->document->getDate('product.birthdate')->getValue(), '2013-10-23');
+        $this->assertEquals($this->document->getDate('product.birthdate')->asText(), '2013-10-23');
         $this->assertEquals($this->document->getDateAs('product.birthdate', 'Y'), '2013');
     }
 
@@ -112,11 +112,14 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
     public function testGetGroup()
     {
         $masterRef = $this->micro_api->master()->getRef();
-        $docchapter = $this->micro_api->forms()->get("everything")->ref($masterRef)->query('[[:d = at(document.id, "UrDndQEAALQMyrXF")]]')->submit();
-        $docchapter = $docchapter[0];
+        $docchapter = $this->micro_api->forms()
+                                      ->get("everything")
+                                      ->ref($masterRef)
+                                      ->query('[[:d = at(document.id, "UrDndQEAALQMyrXF")]]')
+                                      ->submit()->at(0);
 
-        $docchapterdocs = $docchapter->getGroup('docchapter.docs')->getArray();
-        $this->assertEquals(count($docchapterdocs), 2);
+        $docchapterdocs = $docchapter->getGroup('docchapter.docs')->getDocs();
+        $this->assertEquals($docchapterdocs->count(), 2);
         $this->assertEquals(implode("|", array_keys($docchapterdocs[0])), "linktodoc");
         $this->assertEquals($docchapterdocs[0]['linktodoc']->getType(), 'doc');
         $this->assertEquals($docchapterdocs[0]['linktodoc']->asHtml($this->linkResolver), '<a href="http://host/doc/UrDofwEAALAdpbNH">with-jquery</a>');
