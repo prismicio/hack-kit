@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -16,18 +16,18 @@ class ParsedText
     private $text;
     private $spans;
 
-    public function __construct($text, $spans)
+    public function __construct(string $text, ImmVector<string> $spans)
     {
         $this->text = $text;
         $this->spans = $spans;
     }
 
-    public function getText()
+    public function getText(): string
     {
         return $this->text;
     }
 
-    public function getSpans()
+    public function getSpans(): ImmVector<string>
     {
         return $this->spans;
     }

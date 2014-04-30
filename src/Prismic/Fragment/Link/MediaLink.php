@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -11,6 +11,8 @@
 
 namespace Prismic\Fragment\Link;
 
+use Prismic\LinkResolver;
+
 class MediaLink implements LinkInterface
 {
     private $url;
@@ -18,7 +20,7 @@ class MediaLink implements LinkInterface
     private $size;
     private $filename;
 
-    public function __construct($url, $kind, $size, $filename)
+    public function __construct(string $url, string $kind, int $size, string $filename)
     {
         $this->url = $url;
         $this->kind = $kind;
@@ -26,42 +28,37 @@ class MediaLink implements LinkInterface
         $this->filename = $filename;
     }
 
-    public function asHtml($linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
         return '<a href="' . $this->url . '">' . $this->filename . '</a>';
     }
 
-    public function asText()
-    {
-        return $this->getUrl();
-    }
-
-    public function getUrl()
+    public function getUrl(): string
     {
         return $this->url;
     }
 
-    public function getKind()
+    public function getKind(): string
     {
         return $this->kind;
     }
 
-    public function getSize()
+    public function getSize(): long
     {
         return $this->size;
     }
 
-    public function getFilename()
+    public function getFilename(): string
     {
         return $this->filename;
     }
 
-    public static function parse($json)
+    public static function parse($json): MediaLink
     {
         return new MediaLink(
             $json->file->url,
             $json->file->kind,
-            $json->file->size,
+            (int)$json->file->size,
             $json->file->name
         );
     }

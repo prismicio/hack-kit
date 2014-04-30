@@ -23,7 +23,7 @@ class Api
      * @param ApiData $data
      * @param string $accessToken
      */
-    private function __construct(ApiData $data, ?string $accessToken=null)
+    private function __construct(ApiData $data, ?string $accessToken = null)
     {
         $this->data        = $data;
         $this->accessToken = $accessToken;
@@ -109,7 +109,7 @@ class Api
      * @param Client $client
      * @return Api
      */
-    public static function get(string $action, string $accessToken=null, Client $client=null): Api
+    public static function get(string $action, string $accessToken=null, ?Client $client = null): Api
     {
         $url = $action . ($accessToken ? '?access_token=' . $accessToken : '');
         $client = isset($client) ? $client : self::defaultClient();

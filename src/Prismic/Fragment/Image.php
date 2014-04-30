@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -11,28 +11,26 @@
 
 namespace Prismic\Fragment;
 
+use Prismic\LinkResolver;
+use Prismic\Fragment\ImageView;
+
 class Image implements FragmentInterface
 {
     private $main;
     private $views;
 
-    public function __construct($main, $views = array())
+    public function __construct(ImageView $main, ?ImmMap<string, ImageView> $views = null)
     {
         $this->main = $main;
-        $this->views = $views;
+        $this->views = isset($views) ? $views : new ImmMap<string, ImageView>();
     }
 
-    public function asHtml($linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null)
     {
         return $this->main->asHtml();
     }
 
-    public function asText()
-    {
-        return $this->main->getUrl();
-    }
-
-    public function getView($key)
+    public function getView($key): ?ImageView
     {
         if (strtolower($key) == "main") {
             return $this->main;
@@ -41,12 +39,12 @@ class Image implements FragmentInterface
         return $this->views[$key];
     }
 
-    public function getMain()
+    public function getMain(): ImageView
     {
         return $this->main;
     }
 
-    public function getViews()
+    public function getViews(): ImmMap<string, ImageView>
     {
         return $this->views;
     }

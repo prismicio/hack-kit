@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -11,17 +11,19 @@
 
 namespace Prismic\Fragment\Block;
 
+use Prismic\Fragment\ImageView;
+
 class ImageBlock implements BlockInterface
 {
 
     private $view;
 
-    public function __construct($view)
+    public function __construct(ImageView $view)
     {
         $this->view = $view;
     }
 
-    public function getView()
+    public function getView(): ImageView
     {
         return $this->view;
     }

@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -11,38 +11,35 @@
 
 namespace Prismic\Fragment\Link;
 
+use Prismic\LinkResolver;
+
 class WebLink implements LinkInterface
 {
     private $url;
     private $maybeContentType;
 
-    public function __construct($url, $maybeContentType = null)
+    public function __construct(string $url, ?string $maybeContentType = null)
     {
         $this->url = $url;
         $this->maybeContentType = $maybeContentType;
     }
 
-    public function asHtml($linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
         return '<a href="' . $this->url . '">$url</a>';
     }
 
-    public function asText()
-    {
-        return $this->getUrl();
-    }
-
-    public function getUrl()
+    public function getUrl(): string
     {
         return $this->url;
     }
 
-    public function getContentType()
+    public function getContentType(): ?string
     {
         return $this->maybeContentType;
     }
 
-    public static function parse($json)
+    public static function parse($json): WebLink
     {
         return new WebLink($json->url);
     }

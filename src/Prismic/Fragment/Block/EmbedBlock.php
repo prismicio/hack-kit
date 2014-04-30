@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -11,16 +11,18 @@
 
 namespace Prismic\Fragment\Block;
 
+use Prismic\Fragment\Embed;
+
 class EmbedBlock implements BlockInterface
 {
     private $obj;
 
-    public function __construct($obj)
+    public function __construct(Embed $obj)
     {
         $this->obj = $obj;
     }
 
-    public function getObj()
+    public function getObj(): Embed
     {
         return $this->obj;
     }

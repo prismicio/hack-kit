@@ -1,7 +1,7 @@
 <?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -32,21 +32,19 @@ class StructuredText implements FragmentInterface
 {
     private $blocks;
 
-    public function __construct($blocks)
+    public function __construct(ImmVector<BlockInterface> $blocks)
     {
         $this->blocks = $blocks;
     }
 
-    public function getBlocks()
+    public function getBlocks(): ImmVector<BlockInterface>
     {
         return $this->blocks;
     }
 
     public function asText(): string
     {
-        $result = array_map(function ($block) {
-            return $block->getText();
-        }, $this->blocks);
+        $result = $this->blocks->map($block ==> $block->getText());
 
         return join("\n\n", $result);
     }
@@ -148,7 +146,7 @@ class StructuredText implements FragmentInterface
         return "";
     }
 
-    public static function asHtmlText($text, $spans, ?LinkResolver $linkResolver = null): string
+    public static function asHtmlText(string $text, $spans, ?LinkResolver $linkResolver = null): string
     {
         if (empty($spans)) {
             return htmlspecialchars($text);
@@ -265,18 +263,18 @@ class StructuredText implements FragmentInterface
         return null;
     }
 
-    public static function parseText($json): ParsedText
+    public static function parseText(\stdClass $json): ParsedText
     {
         $text = $json->text;
-        $spans = array();
+        $spans = new Vector<string>();
         foreach ($json->spans as $spanJson) {
             $span = StructuredText::parseSpan($spanJson);
             if (isset($span)) {
-                array_push($spans, $span);
+                $spans->add($span);
             }
         }
 
-        return new ParsedText($text, $spans);
+        return new ParsedText($text, $spans->toImmVector());
     }
 
     public static function parseBlock($json): ?BlockInterface
@@ -334,7 +332,7 @@ class StructuredText implements FragmentInterface
         }
 
         if ($json->type == 'preformatted') {
-            return new PreformattedBlock($json->text, $json->spans, false);
+            return new PreformattedBlock($json->text, new ImmVector($json->spans));
         }
 
         return null;
@@ -342,14 +340,14 @@ class StructuredText implements FragmentInterface
 
     public static function parse($json): StructuredText
     {
-        $blocks = array();
+        $blocks = new Vector<BlockInterface>();
         foreach ($json as $blockJson) {
             $maybeBlock = StructuredText::parseBlock($blockJson);
             if (isset($maybeBlock)) {
-                array_push($blocks, $maybeBlock);
+                $blocks->add($maybeBlock);
             }
         }
 
-        return new StructuredText($blocks);
+        return new StructuredText($blocks->toImmVector());
     }
 }

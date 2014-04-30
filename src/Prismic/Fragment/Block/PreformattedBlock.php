@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -11,31 +11,26 @@
 
 namespace Prismic\Fragment\Block;
 
+use Prismic\Fragment\Span\SpanInterface;
+
 class PreformattedBlock implements TextInterface
 {
     private $text;
     private $spans;
-    private $level;
 
-    public function __construct($text, $spans, $level)
+    public function __construct(string $text, ImmVector<SpanInterface> $spans)
     {
         $this->text = $text;
         $this->spans = $spans;
-        $this->level = $level;
     }
 
-    public function getText()
+    public function getText(): string
     {
         return $this->text;
     }
 
-    public function getSpans()
+    public function getSpans(): ImmVector<SpanInterface>
     {
         return $this->spans;
-    }
-
-    public function getLevel()
-    {
-        return $this->level;
     }
 }

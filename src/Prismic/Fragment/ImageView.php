@@ -12,6 +12,7 @@
 namespace Prismic\Fragment;
 
 use DOMDocument;
+use Prismic\LinkResolver;
 
 class ImageView
 {
@@ -30,7 +31,7 @@ class ImageView
         $this->height = $height;
     }
 
-    public function asHtml($linkResolver = null, $attributes = array())
+    public function asHtml(?LinkResolver $linkResolver = null, $attributes = array())
     {
         $doc = new DOMDocument();
         $img = $doc->createElement('img');
@@ -44,7 +45,7 @@ class ImageView
             $img->setAttribute($key, $value);
         }
         $doc->appendChild($img);
-        return trim($doc->saveHTML()); // trim removes trailing newline
+        return trim($doc->saveHTML());// trim removes trailing newline
     }
 
     public function ratio(): double

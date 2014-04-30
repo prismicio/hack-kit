@@ -13,7 +13,6 @@ namespace Prismic\Fragment;
 
 use Prismic\Document;
 use Prismic\LinkResolver;
-use Prismic\Fragment\GroupDoc;
 use Prismic\Fragment\FragmentInterface;
 
 class Group implements FragmentInterface

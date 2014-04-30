@@ -85,13 +85,13 @@ class Document implements WithFragmentsInterface
         if (is_object($json) && property_exists($json, "type")) {
             if ($json->type === "Image") {
                 $data = $json->value;
-                $views = array();
+                $views = new Map<string, ImageView>();
                 foreach ($json->value->views as $key => $jsonView) {
-                    $views[$key] = ImageView::parse($jsonView);
+                    $views->add(Pair {$key, ImageView::parse($jsonView)});
                 }
                 $mainView = ImageView::parse($data->main, $views);
 
-                return new Image($mainView, $views);
+                return new Image($mainView, $views->toImmMap());
             }
 
             if ($json->type === "Color") {

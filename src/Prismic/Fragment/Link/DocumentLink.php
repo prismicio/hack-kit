@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -19,7 +19,7 @@ class DocumentLink implements LinkInterface
     private $slug;
     private $isBroken;
 
-    public function __construct($id, $type, $tags, $slug, $isBroken)
+    public function __construct(string $id, string $type, ImmVector<string> $tags, string $slug, bool $isBroken)
     {
         $this->id = $id;
         $this->type = $type;
@@ -28,48 +28,43 @@ class DocumentLink implements LinkInterface
         $this->isBroken = $isBroken;
     }
 
-    public function asHtml($linkResolver)
+    public function asHtml($linkResolver): string
     {
         return '<a href="' . $linkResolver($this) . '">' . $this->slug . '</a>';
     }
 
-    public static function parse($json)
+    public static function parse($json): DocumentLink
     {
         return new DocumentLink(
             $json->document->id,
             $json->document->type,
-            isset($json->document->{'tags'}) ? $json->document->tags : null,
+            isset($json->document->{'tags'}) ? new ImmVector($json->document->tags) : new ImmVector(),
             $json->document->slug,
             $json->isBroken
         );
     }
 
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    public function asText()
-    {
-        return $this->id;
-    }
-
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
-    public function getTags()
+    public function getTags(): ImmVector<string>
     {
         return $this->tags;
     }
 
-    public function getSlug()
+    public function getSlug(): string
     {
         return $this->slug;
     }
 
-    public function isBroken()
+    public function isBroken(): bool
     {
         return $this->isBroken;
     }
