@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -13,12 +13,12 @@ namespace Prismic;
 
 class Form
 {
-    private $maybeName;
-    private $method;
-    private $maybeRel;
-    private $enctype;
-    private $action;
-    private $fields;
+    private ?string $maybeName;
+    private string $method;
+    private ?string $maybeRel;
+    private string $enctype;
+    private string $action;
+    private ImmMap<string, FieldForm> $fields;
 
     /**
      * @param string    $maybeName
@@ -26,7 +26,7 @@ class Form
      * @param string    $maybeRel
      * @param string    $enctype
      * @param ImmMap    $action
-     * @param FieldForm $fields
+     * @param ImmMap    $fields
      */
     public function __construct(
         ?string $maybeName,

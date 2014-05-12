@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -17,7 +17,7 @@ use Prismic\Fragment\FragmentInterface;
 
 class Group implements FragmentInterface
 {
-    private $docs;
+    private ImmVector<Pair<string, FragmentInterface>> $docs;
 
     public function __construct(ImmVector<Pair<string, FragmentInterface>> $docs)
     {

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -13,13 +13,13 @@ namespace Prismic;
 
 class ApiData
 {
-    private $refs;
-    private $bookmarks;
-    private $types;
-    private $tags;
-    private $forms;
-    private $oauth_initiate;
-    private $oauth_token;
+    private ImmVector<Ref> $refs;
+    private ImmMap<string, string> $bookmarks;
+    private ImmMap<string, string> $types;
+    private ImmVector<string> $tags;
+    private ImmMap<string, Form> $forms;
+    private string $oauth_initiate;
+    private string $oauth_token;
 
     /**
      * @param ImmVector $refs

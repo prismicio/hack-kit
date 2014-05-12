@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -15,7 +15,7 @@ use Prismic\LinkResolver;
 
 class Date implements FragmentInterface
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $value)
     {

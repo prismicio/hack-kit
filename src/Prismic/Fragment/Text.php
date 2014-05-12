@@ -1,4 +1,4 @@
-<?php
+<?hh // strict
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -13,25 +13,19 @@ namespace Prismic\Fragment;
 
 class Text implements FragmentInterface
 {
-    private $value;
+    private string $value;
 
-    public function __construct($value)
+    public function __construct(string $value)
     {
         $this->value = $value;
     }
 
-    public function asHtml($linkResolver = null)
+    public function getValue(): string {
+        return $this->value;
+    }
+
+    public function asHtml($linkResolver = null): string
     {
         return '<span class="text">' . nl2br(htmlentities($this->value)) . '</span>';
-    }
-
-    public function asText()
-    {
-        return $this->getValue();
-    }
-
-    public function getValue()
-    {
-        return $this->value;
     }
 }

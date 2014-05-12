@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -14,9 +14,9 @@ namespace Prismic;
 class FieldForm
 {
 
-    private $type;
-    private $multiple;
-    private $defaultValue;
+    private string $type;
+    private boolean $multiple;
+    private ?string $defaultValue;
 
     /**
      * @param string  $type

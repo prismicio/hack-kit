@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -16,9 +16,9 @@ use Prismic\Fragment\Span\SpanInterface;
 class ListItemBlock implements TextInterface
 {
 
-    private $text;
-    private $spans;
-    private $ordered;
+    private string $text;
+    private ImmVector<SpanInterface> $spans;
+    private bool $ordered;
 
     public function __construct(string $text, ImmVector<SpanInterface> $spans, bool $ordered)
     {

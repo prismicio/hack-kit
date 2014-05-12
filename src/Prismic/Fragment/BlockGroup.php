@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -15,8 +15,8 @@ use Prismic\Fragment\Block\BlockInterface;
 
 class BlockGroup
 {
-    private $maybeTag;
-    private $blocks;
+    private ?string $maybeTag;
+    private ImmVector<BlockInterface> $blocks;
 
     public function __construct(?string $maybeTag, ImmVector<BlockInterface> $blocks)
     {

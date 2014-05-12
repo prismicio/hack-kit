@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -16,11 +16,11 @@ use Prismic\LinkResolver;
 
 class ImageView
 {
-    private $url;
-    private $alt;
-    private $copyright;
-    private $width;
-    private $height;
+    private string $url;
+    private string $alt;
+    private string $copyright;
+    private int $width;
+    private int $height;
 
     public function __construct(string $url, string $alt, string $copyright, int $width, int $height)
     {

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -15,10 +15,10 @@ use Prismic\LinkResolver;
 
 class MediaLink implements LinkInterface
 {
-    private $url;
-    private $kind;
-    private $size;
-    private $filename;
+    private string $url;
+    private string $kind;
+    private int $size;
+    private string $filename;
 
     public function __construct(string $url, string $kind, int $size, string $filename)
     {

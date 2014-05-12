@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -15,9 +15,9 @@ use Prismic\Fragment\Span\SpanInterface;
 
 class HeadingBlock implements TextInterface
 {
-    private $text;
-    private $spans;
-    private $level;
+    private string $text;
+    private ImmVector<SpanInterface> $spans;
+    private int $level;
 
     public function __construct(string $text, ImmVector<SpanInterface> $spans, int $level)
     {

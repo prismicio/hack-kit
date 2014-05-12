@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -30,7 +30,7 @@ use Prismic\Fragment\Span\SpanInterface;
 
 class StructuredText implements FragmentInterface
 {
-    private $blocks;
+    private ImmVector<BlockInterface> $blocks;
 
     public function __construct(ImmVector<BlockInterface> $blocks)
     {

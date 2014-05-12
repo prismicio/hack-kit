@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -16,13 +16,13 @@ use Prismic\LinkResolver;
 class Embed implements FragmentInterface
 {
 
-    private $type;
-    private $provider;
-    private $url;
-    private $maybeWidth;
-    private $maybeHeight;
-    private $maybeHtml;
-    private $oembedJson;
+    private string $type;
+    private string $provider;
+    private string $url;
+    private ?int $maybeWidth;
+    private ?int $maybeHeight;
+    private ?string $maybeHtml;
+    private \stdClass $oembedJson;
 
     public function __construct(
         string $type,
@@ -42,7 +42,7 @@ class Embed implements FragmentInterface
         $this->oembedJson = $oembedJson;
     }
 
-    public function asHtml(?LinkResolver $linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
         if (isset($this->maybeHtml)) {
             return '<div data-oembed="' . $this->url . '" data-oembed-type="' .

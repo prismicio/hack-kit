@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -15,8 +15,8 @@ use Prismic\Fragment\Span\SpanInterface;
 
 class PreformattedBlock implements TextInterface
 {
-    private $text;
-    private $spans;
+    private string $text;
+    private ImmVector<SpanInterface> $spans;
 
     public function __construct(string $text, ImmVector<SpanInterface> $spans)
     {

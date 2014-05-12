@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -16,9 +16,9 @@ use Prismic\Fragment\Link\LinkInterface;
 class HyperlinkSpan implements SpanInterface
 {
 
-    private $start;
-    private $end;
-    private $link;
+    private int $start;
+    private int $end;
+    private LinkInterface $link;
 
     public function __construct(int $start, int $end, LinkInterface $link)
     {

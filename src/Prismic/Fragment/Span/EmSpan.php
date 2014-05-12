@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hh SDK
@@ -13,8 +13,8 @@ namespace Prismic\Fragment\Span;
 
 class EmSpan implements SpanInterface
 {
-    private $start;
-    private $end;
+    private int $start;
+    private int $end;
 
     public function __construct(int $start, int $end)
     {

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -15,9 +15,9 @@ use Prismic\Document;
 
 class SearchForm
 {
-    private $api;
-    private $form;
-    private $data;
+    private Api $api;
+    private Form $form;
+    private ImmMap<string, ImmVector<string>> $data;
 
     /**
      * @param Api    $client

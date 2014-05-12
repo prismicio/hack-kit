@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -11,13 +11,16 @@
 
 namespace Prismic\Fragment\Link;
 
+use Prismic\Fragment\Link\LinkInterface;
+use Prismic\LinkResolver;
+
 class DocumentLink implements LinkInterface
 {
-    private $id;
-    private $type;
-    private $tags;
-    private $slug;
-    private $isBroken;
+    private string $id;
+    private string $type;
+    private ImmVector<string> $tags;
+    private string $slug;
+    private bool $isBroken;
 
     public function __construct(string $id, string $type, ImmVector<string> $tags, string $slug, bool $isBroken)
     {
@@ -28,12 +31,12 @@ class DocumentLink implements LinkInterface
         $this->isBroken = $isBroken;
     }
 
-    public function asHtml($linkResolver): string
+    public function asHtml(LinkResolver $linkResolver): string
     {
         return '<a href="' . $linkResolver($this) . '">' . $this->slug . '</a>';
     }
 
-    public static function parse($json): DocumentLink
+    public static function parse(\stdClass $json): DocumentLink
     {
         return new DocumentLink(
             $json->document->id,

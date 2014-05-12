@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic PHP SDK
@@ -13,10 +13,10 @@ namespace Prismic;
 
 class Ref
 {
-    private $ref;
-    private $label;
-    private $isMasterRef;
-    private $maybeScheduledAt;
+    private string $ref;
+    private string $label;
+    private boolean $isMasterRef;
+    private ?string $maybeScheduledAt;
 
     /**
      * @param string $ref

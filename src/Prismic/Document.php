@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -31,12 +31,12 @@ class Document implements WithFragmentsInterface
 {
     use WithFragments;
 
-    private $id;
-    private $type;
-    private $href;
-    private $tags;
-    private $slugs;
-    private $fragments;
+    private string $id;
+    private string $type;
+    private string $href;
+    private ImmVector<string> $tags;
+    private ImmVector<string> $slugs;
+    private ImmMap<string, FragmentInterface> $fragments;
 
     /**
      * @param string    $id

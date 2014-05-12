@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -15,7 +15,7 @@ use Prismic\Fragment\Embed;
 
 class EmbedBlock implements BlockInterface
 {
-    private $obj;
+    private Embed $obj;
 
     public function __construct(Embed $obj)
     {

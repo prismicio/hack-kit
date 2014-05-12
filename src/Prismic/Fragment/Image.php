@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -16,8 +16,8 @@ use Prismic\Fragment\ImageView;
 
 class Image implements FragmentInterface
 {
-    private $main;
-    private $views;
+    private ImageView $main;
+    private ?ImmMap<string, ImageView> $views;
 
     public function __construct(ImageView $main, ?ImmMap<string, ImageView> $views = null)
     {
@@ -25,7 +25,7 @@ class Image implements FragmentInterface
         $this->views = isset($views) ? $views : new ImmMap<string, ImageView>();
     }
 
-    public function asHtml(?LinkResolver $linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
         return $this->main->asHtml();
     }

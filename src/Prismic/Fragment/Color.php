@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -15,7 +15,7 @@ use Prismic\LinkResolver;
 
 class Color implements FragmentInterface
 {
-    private $hex;
+    private string $hex;
 
     public function __construct(string $hex)
     {

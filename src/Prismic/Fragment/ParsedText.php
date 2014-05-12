@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -13,8 +13,8 @@ namespace Prismic\Fragment;
 
 class ParsedText
 {
-    private $text;
-    private $spans;
+    private string $text;
+    private ImmVector<string> $spans;
 
     public function __construct(string $text, ImmVector<string> $spans)
     {

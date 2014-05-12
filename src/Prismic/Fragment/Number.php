@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -13,7 +13,7 @@ namespace Prismic\Fragment;
 
 class Number implements FragmentInterface
 {
-    private $value;
+    private double $value;
 
     public function __construct(double $value)
     {

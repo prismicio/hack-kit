@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -14,8 +14,8 @@ namespace Prismic\Fragment\Span;
 class StrongSpan implements SpanInterface
 {
 
-    private $start;
-    private $end;
+    private int $start;
+    private int $end;
 
     public function __construct(int $start, int $end)
     {

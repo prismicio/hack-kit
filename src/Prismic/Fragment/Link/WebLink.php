@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * This file is part of the Prismic hack SDK
@@ -15,8 +15,8 @@ use Prismic\LinkResolver;
 
 class WebLink implements LinkInterface
 {
-    private $url;
-    private $maybeContentType;
+    private string $url;
+    private ?string $maybeContentType;
 
     public function __construct(string $url, ?string $maybeContentType = null)
     {
