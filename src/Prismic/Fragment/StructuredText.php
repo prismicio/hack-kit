@@ -12,6 +12,7 @@
 namespace Prismic\Fragment;
 
 use Prismic\LinkResolver;
+use Prismic\Fragment\ImageView;
 use Prismic\Fragment\Block\EmbedBlock;
 use Prismic\Fragment\Block\HeadingBlock;
 use Prismic\Fragment\Block\ImageBlock;
@@ -78,7 +79,7 @@ class StructuredText implements FragmentInterface
 
     public function asHtml(?LinkResolver $linkResolver = null): string
     {
-        $groups = new Vector<BlockGroup>();
+        $groups = new Vector();
         foreach ($this->blocks as $block) {
             $count = count($groups);
             if ($count > 0) {
@@ -146,22 +147,23 @@ class StructuredText implements FragmentInterface
         return "";
     }
 
-    public static function asHtmlText(string $text, $spans, ?LinkResolver $linkResolver = null): string
+    public static function asHtmlText(string $text, $spans, ?LinkResolver $linkResolver = null): ?string
     {
         if (empty($spans)) {
             return htmlspecialchars($text);
         }
 
-        $doc = new \DOMDocument;
+        $doc = new \DOMDocument();
         $doc->appendChild($doc->createTextNode($text));
 
-        $iterateChildren = function ($node, $start, $span) use (&$iterateChildren, $linkResolver) {
+        $iterateChildren = null;
+        $iterateChildren = ($node, $start, $span) ==> {
             $nodeLength = mb_strlen($node->textContent);
 
             // If this is a text node we have found the right node
             if ($node instanceof \DOMText) {
                 if ($span->getEnd() - $span->getStart() > $nodeLength) {
-                    return;
+                    return null;
                 }
 
                 // Split the text node into a head, meat and tail
@@ -195,12 +197,12 @@ class StructuredText implements FragmentInterface
                 // Replace the original meat text node with the span
                 $meat->parentNode->replaceChild($spanNode, $meat);
 
-                return;
+                return null;
             }
 
             // Skip this node if the span start is beyond it
             if ($span->getStart() >= $start + mb_strlen($node->textContent)) {
-                return;
+                return null;
             }
 
             // Loop over child nodes to find the correct one
@@ -216,7 +218,7 @@ class StructuredText implements FragmentInterface
             }
 
             // Not found
-            return;
+            return null;
         };
 
         foreach ($spans as $span) {
@@ -230,7 +232,7 @@ class StructuredText implements FragmentInterface
 
     }
 
-    public static function parseSpan(\stdClass $json): ?SpanInterface
+    public static function parseSpan($json): ?SpanInterface
     {
         $type = $json->type;
         $start = $json->start;
@@ -263,10 +265,10 @@ class StructuredText implements FragmentInterface
         return null;
     }
 
-    public static function parseText(\stdClass $json): ParsedText
+    public static function parseText($json): ParsedText
     {
         $text = $json->text;
-        $spans = new Vector<string>();
+        $spans = new Vector();
         foreach ($json->spans as $spanJson) {
             $span = StructuredText::parseSpan($spanJson);
             if (isset($span)) {
@@ -340,7 +342,7 @@ class StructuredText implements FragmentInterface
 
     public static function parse($json): StructuredText
     {
-        $blocks = new Vector<BlockInterface>();
+        $blocks = new Vector();
         foreach ($json as $blockJson) {
             $maybeBlock = StructuredText::parseBlock($blockJson);
             if (isset($maybeBlock)) {

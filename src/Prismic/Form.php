@@ -78,7 +78,7 @@ class Form
         return $this->action;
     }
 
-    public function getFields(): ImmMap<String, FieldForm>
+    public function getFields(): ImmMap<string, FieldForm>
     {
         return $this->fields;
     }
@@ -86,9 +86,9 @@ class Form
     public static function parse($json): Form
     {
         return new Form(
-            isset($json->{"name"}) ? $json->{"name"} : null,
+            $json->name,
             $json->method,
-            isset($json->{"rel"}) ? $json->{"rel"} : null,
+            $json->rel,
             $json->enctype,
             $json->action,
             (new ImmMap((array)$json->fields))->map($data ==> FieldForm::parse($data))

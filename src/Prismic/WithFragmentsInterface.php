@@ -11,8 +11,9 @@
 
 namespace Prismic;
 
+use Prismic\Fragment\FragmentInterface;
+
 interface WithFragmentsInterface {
 
-    public function fragments(): ImmMap<string, Fragment>;
+    public function fragments(): ImmMap<string, FragmentInterface>;
 }
-

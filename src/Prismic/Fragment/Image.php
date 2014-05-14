@@ -22,7 +22,7 @@ class Image implements FragmentInterface
     public function __construct(ImageView $main, ?ImmMap<string, ImageView> $views = null)
     {
         $this->main = $main;
-        $this->views = isset($views) ? $views : new ImmMap<string, ImageView>();
+        $this->views = isset($views) ? $views : new ImmMap();
     }
 
     public function asHtml(?LinkResolver $linkResolver = null): string

@@ -37,7 +37,7 @@ class Api
     public function refs(): ImmMap<string, Ref>
     {
         $refs = $this->data->getRefs();
-        $groupBy = new Map<string,Vector<Ref>>();
+        $groupBy = new Map();
         foreach ($refs as $ref) {
             $maybeGrouped = $groupBy->get($ref->getLabel());
             if (isset($maybeGrouped)) {
@@ -109,7 +109,7 @@ class Api
      * @param Client $client
      * @return Api
      */
-    public static function get(string $action, string $accessToken=null, ?Client $client = null): Api
+    public static function get(string $action, string $accessToken=null, $client = null): Api
     {
         $url = $action . ($accessToken ? '?access_token=' . $accessToken : '');
         $client = isset($client) ? $client : self::defaultClient();
@@ -135,15 +135,16 @@ class Api
         return new Api($apiData, $accessToken);
     }
 
-    public static function defaultClient(): Client
+    public static function defaultClient()
     {
+        // UNSAFE
         return new Client('', array(
             Client::CURL_OPTIONS => array(
-                CURLOPT_CONNECTTIMEOUT => 10,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT        => 60,
-                CURLOPT_USERAGENT      => 'prismic-php-0.1',
-                CURLOPT_HTTPHEADER     => array('Accept: application/json')
+                \CURLOPT_CONNECTTIMEOUT => 10,
+                \CURLOPT_RETURNTRANSFER => true,
+                \CURLOPT_TIMEOUT        => 60,
+                \CURLOPT_USERAGENT      => 'prismic-php-0.1',
+                \CURLOPT_HTTPHEADER     => array('Accept: application/json')
             )
         ));
     }

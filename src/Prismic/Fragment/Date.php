@@ -39,6 +39,7 @@ class Date implements FragmentInterface
 
     public function asEpoch(): int
     {
+        // UNSAFE
         return strtotime($this->value);
     }
 

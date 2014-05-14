@@ -15,15 +15,15 @@ class FieldForm
 {
 
     private string $type;
-    private boolean $multiple;
+    private bool $multiple;
     private ?string $defaultValue;
 
     /**
      * @param string  $type
-     * @param boolean $multiple
+     * @param bool $multiple
      * @param string  $defaultValue
      */
-    public function __construct(string $type, boolean $mutiple, ?string $defaultValue)
+    public function __construct(string $type, bool $mutiple, ?string $defaultValue)
     {
         $this->type = $type;
         $this->multiple = $mutiple;
@@ -40,7 +40,7 @@ class FieldForm
         return $this->defaultValue;
     }
 
-    public function isMultiple(): boolean
+    public function isMultiple(): bool
     {
         return $this->multiple;
     }
@@ -49,8 +49,8 @@ class FieldForm
     {
         return new FieldForm(
             $json->type,
-            isset($json->{"multiple"}) ? $json->{"multiple"} : false,
-            isset($json->{"default"}) ? $json->{"default"} : null
+            isset($json->multiple) ? $json->multiple : false,
+            $json->default
         );
     }
 }

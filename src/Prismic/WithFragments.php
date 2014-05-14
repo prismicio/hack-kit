@@ -41,10 +41,11 @@ trait WithFragments {
         }
     }
 
-    public function getAll(string $field): ImmVector<Fragment> {
+    public function getAll(string $field): ImmVector<FragmentInterface> {
         $indexedKey = '/^([^\[]+)(\[\d+\])?$/';
         return $this->fragments()
                     ->filterWithKey(($key, $value) ==> {
+                        $groups = null;
                         if (preg_match($indexedKey, $key, $groups) == 1) {
                             return isset($groups) && $groups[1] == $field;
                         } else {
@@ -66,7 +67,6 @@ trait WithFragments {
                     $text = $text . "\n";
                 }
             }
-
             return trim($text);
         } elseif (isset($fragment) && $fragment instanceof Number) {
             return (string)$fragment->getValue();
@@ -168,7 +168,7 @@ trait WithFragments {
     public function getAllImages(string $field): ImmVector<Image>
     {
         $fragments = $this->getAll($field);
-        $images = new Vector<Image>();
+        $images = new Vector();
         foreach ($fragments as $fragment) {
             if (isset($fragment) && $fragment instanceof Image) {
                 $images->add($fragment);

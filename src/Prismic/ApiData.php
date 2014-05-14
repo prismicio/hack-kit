@@ -11,6 +11,8 @@
 
 namespace Prismic;
 
+use Prismic\Form;
+
 class ApiData
 {
     private ImmVector<Ref> $refs;

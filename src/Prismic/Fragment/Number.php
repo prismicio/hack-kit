@@ -13,9 +13,9 @@ namespace Prismic\Fragment;
 
 class Number implements FragmentInterface
 {
-    private double $value;
+    private float $value;
 
-    public function __construct(double $value)
+    public function __construct(float $value)
     {
         $this->value = $value;
     }
@@ -34,7 +34,7 @@ class Number implements FragmentInterface
         return '<span class="number">' . $this->value . '</span>';
     }
 
-    public function getValue(): double
+    public function getValue(): float
     {
         return $this->value;
     }

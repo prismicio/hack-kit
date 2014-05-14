@@ -15,25 +15,26 @@ class Ref
 {
     private string $ref;
     private string $label;
-    private boolean $isMasterRef;
+    private bool $isMasterRef;
     private ?string $maybeScheduledAt;
 
     /**
      * @param string $ref
      * @param string $label
-     * @param boolean $isMasterRef
+     * @param bool $isMasterRef
      * @param date $maybeScheduledAt
      */
     public function __construct(
         string $ref,
         string $label,
-        boolean $isMasterRef,
+        bool $isMasterRef,
         ?string $maybeScheduledAt
     ) {
         $this->ref = $ref;
         $this->label = $label;
         $this->isMasterRef = $isMasterRef;
         $this->maybeScheduledAt = $maybeScheduledAt;
+        isset($this->ref);
     }
 
     public function getRef(): string
@@ -46,7 +47,7 @@ class Ref
         return $this->label;
     }
 
-    public function isMasterRef(): boolean
+    public function isMasterRef(): bool
     {
         return $this->isMasterRef;
     }
@@ -56,13 +57,13 @@ class Ref
         return $this->maybeScheduledAt;
     }
 
-    public static function parse($json): Ref
+    public static function parse(mixed $json): Ref
     {
         return new Ref(
             $json->ref,
             $json->label,
-            isset($json->{'isMasterRef'}) ? $json->isMasterRef : false,
-            isset($json->{'scheduledAt'}) ? $json->scheduledAt : null    // @todo: convert value into \DateTime ?
+            isset($json->isMasterRef) ? $json->isMasterRef : false,
+            $json->scheduledAt
         );
     }
 }

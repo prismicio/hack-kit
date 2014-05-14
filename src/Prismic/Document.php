@@ -80,12 +80,12 @@ class Document implements WithFragmentsInterface
         return $this->slugs->toImmSet()->contains($slug);
     }
 
-    public static function parseFragment(\stdClass $json): ?FragmentInterface
+    public static function parseFragment($json): ?FragmentInterface
     {
         if (is_object($json) && property_exists($json, "type")) {
             if ($json->type === "Image") {
                 $data = $json->value;
-                $views = new Map<string, ImageView>();
+                $views = new Map();
                 foreach ($json->value->views as $key => $jsonView) {
                     $views->add(Pair {$key, ImageView::parse($jsonView)});
                 }
@@ -142,9 +142,9 @@ class Document implements WithFragmentsInterface
         }
     }
 
-    public static function parse(\stdClass $json): Document
+    public static function parse($json): Document
     {
-        $fragments = new Map<string, FragmentInterface>();
+        $fragments = new Map();
         foreach ($json->data as $type => $fields) {
             foreach ($fields as $key => $value) {
                 if (is_array($value)) {

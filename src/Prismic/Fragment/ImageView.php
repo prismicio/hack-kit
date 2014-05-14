@@ -45,10 +45,10 @@ class ImageView
             $img->setAttribute($key, $value);
         }
         $doc->appendChild($img);
-        return trim($doc->saveHTML());// trim removes trailing newline
+        return trim($doc->saveHTML());
     }
 
-    public function ratio(): double
+    public function ratio(): float
     {
         return $this->width / $this->height;
     }

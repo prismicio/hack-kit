@@ -11,8 +11,6 @@
 
 namespace Prismic;
 
-use Prismic\Document;
-
 class SearchForm
 {
     private Api $api;
@@ -48,21 +46,21 @@ class SearchForm
                 $this->data->toMap()->add(Pair{$key, $values})->toImmMap()
             );
         } else {
-            throw new \RuntimeException("Unknown field " . $field);
+            throw new \RuntimeException("Unknown field " . $maybeField);
         }
     }
 
     public function setInt(string $key, int $value)
     {
-        $maybeField = $this->$form->getFields()->get($key);
+        $maybeField = $this->form->getFields()->get($key);
         if(isset($maybeField)) {
             if($maybeField->type == 'Integer') {
                 $this->set($key, $value->toString());
             } else {
-                throw new \RuntimeException("Cannot use a int as value for the field" . $field . "of type"  . $field->type);
+                throw new \RuntimeException("Cannot use a int as value for the field" . $maybeField . "of type"  . $maybeField->type);
             }
         } else {
-            throw new \RuntimeException("Unknown field " . $field);
+            throw new \RuntimeException("Unknown field " . $maybeField);
         }
     }
 
@@ -118,7 +116,7 @@ class SearchForm
      *
      * @return ImmVector
      */
-    private static function parseResult(\stdClass $json): ImmVector<Document>
+    private static function parseResult($json): ImmVector<Document>
     {
         return (new ImmVector($json->results))->map($doc ==> Document::parse($doc));
     }
@@ -186,7 +184,7 @@ class SearchForm
      *
      * @return the raw (unparsed) response
      */
-    private function submit_raw(): \stdClass
+    private function submit_raw()
     {
         if ($this->form->getMethod() == 'GET' &&
             $this->form->getEnctype() == 'application/x-www-form-urlencoded' &&
@@ -219,6 +217,7 @@ class SearchForm
     private static function strip(string $str): string
     {
         $trimmed = trim($str);
+
         $drop1 = substr($trimmed, 1, strlen($trimmed));
         $dropR1 = substr($drop1, 0, strlen($drop1) - 1);
 

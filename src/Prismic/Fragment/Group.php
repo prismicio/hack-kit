@@ -53,9 +53,9 @@ class Group implements FragmentInterface
         return $this->docs;
     }
 
-    public static function parseSubfragments(\stdClass $json): ImmMap<string, FragmentInterface>
+    public static function parseSubfragments($json): ImmMap<string, FragmentInterface>
     {
-        $subfragments = new Map<string, FragmentInterface>();
+        $subfragments = new Map();
         foreach ($json as $name => $value) {
             $f = Document::parseFragment($value);
             if (isset($f)) {
@@ -66,9 +66,9 @@ class Group implements FragmentInterface
         return $subfragments->toImmMap();
     }
 
-    public static function parse(array $json): Group
+    public static function parse($json): Group
     {
-        $results = new Vector<ImmMap<string, FragmentInterface>>();
+        $results = new Vector();
         foreach ($json as $subfragments) {
             $fs = Group::parseSubfragments($subfragments);
             $results->add($fs);

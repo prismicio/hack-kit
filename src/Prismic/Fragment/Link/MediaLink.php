@@ -43,7 +43,7 @@ class MediaLink implements LinkInterface
         return $this->kind;
     }
 
-    public function getSize(): long
+    public function getSize(): int
     {
         return $this->size;
     }

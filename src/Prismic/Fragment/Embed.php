@@ -22,7 +22,7 @@ class Embed implements FragmentInterface
     private ?int $maybeWidth;
     private ?int $maybeHeight;
     private ?string $maybeHtml;
-    private \stdClass $oembedJson;
+    private $oembedJson;
 
     public function __construct(
         string $type,
@@ -31,7 +31,7 @@ class Embed implements FragmentInterface
         ?int $maybeWidth,
         ?int $maybeHeigth,
         ?string $maybeHtml,
-        \stdClass $oembedJson
+        $oembedJson
     ) {
         $this->type = $type;
         $this->provider = $provider;
@@ -53,7 +53,7 @@ class Embed implements FragmentInterface
         }
     }
 
-    public static function parse(\stdClass $json): Embed
+    public static function parse($json): Embed
     {
         return new Embed(
             $json->oembed->type,

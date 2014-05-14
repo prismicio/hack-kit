@@ -36,12 +36,12 @@ class DocumentLink implements LinkInterface
         return '<a href="' . $linkResolver($this) . '">' . $this->slug . '</a>';
     }
 
-    public static function parse(\stdClass $json): DocumentLink
+    public static function parse($json): DocumentLink
     {
         return new DocumentLink(
             $json->document->id,
             $json->document->type,
-            isset($json->document->{'tags'}) ? new ImmVector($json->document->tags) : new ImmVector(),
+            isset($json->document->tags) ? new ImmVector($json->document->tags) : new ImmVector(),
             $json->document->slug,
             $json->isBroken
         );
