@@ -34,7 +34,7 @@ class Ref
         $this->label = $label;
         $this->isMasterRef = $isMasterRef;
         $this->maybeScheduledAt = $maybeScheduledAt;
-        isset($this->ref);
+        $this->ref != null;
     }
 
     public function getRef(): string
@@ -57,13 +57,13 @@ class Ref
         return $this->maybeScheduledAt;
     }
 
-    public static function parse(mixed $json): Ref
+    public static function parse(ImmMap<string, mixed> $json): Ref
     {
         return new Ref(
-            $json->ref,
-            $json->label,
-            isset($json->isMasterRef) ? $json->isMasterRef : false,
-            $json->scheduledAt
+            (string)$json->at('ref'),
+            (string)$json->at('label'),
+            (bool)(!is_null($json->get('isMasterRef')) ? $json->at('isMasterRef') : false),
+            (string)$json->at('scheduledAt')
         );
     }
 }

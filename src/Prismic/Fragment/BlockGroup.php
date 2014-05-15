@@ -24,7 +24,7 @@ class BlockGroup
         $this->blocks = $blocks;
     }
 
-    public function addBlock($block): BlockGroup
+    public function addBlock(BlockInterface $block): BlockGroup
     {
         $updated = $this->blocks->toVector()->add($block);
         return new BlockGroup($this->maybeTag, $updated->toImmVector());

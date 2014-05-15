@@ -18,7 +18,7 @@ class PreformattedBlock implements TextInterface
     private string $text;
     private ImmVector<SpanInterface> $spans;
 
-    public function __construct(string $text, ImmVector<SpanInterface> $spans)
+    public function __construct(string $text, ImmVector<SpanInterface> $spans = ImmVector {})
     {
         $this->text = $text;
         $this->spans = $spans;

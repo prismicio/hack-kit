@@ -31,26 +31,18 @@ class ImageView
         $this->height = $height;
     }
 
-    public function asHtml(?LinkResolver $linkResolver = null, $attributes = array())
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
+        // UNSAFE
         $doc = new DOMDocument();
         $img = $doc->createElement('img');
-        $attributes = array_merge(array(
-            'src' => $this->getUrl(),
-            'alt' => $this->getAlt(),
-            'width' => $this->getWidth(),
-            'height' => $this->getHeight(),
-        ), $attributes);
-        foreach ($attributes as $key => $value) {
-            $img->setAttribute($key, $value);
-        }
         $doc->appendChild($img);
         return trim($doc->saveHTML());
     }
 
     public function ratio(): float
     {
-        return $this->width / $this->height;
+        return (float)$this->width / (float)$this->height;
     }
 
     public function getUrl(): string
@@ -78,14 +70,15 @@ class ImageView
         return $this->height;
     }
 
-    public static function parse($json): ImageView
+    public static function parse(ImmMap<string, mixed> $json): ImageView
     {
+        $dimensions = \Prismic\Tools::requireImmMap($json->at('dimensions'));
         return new ImageView(
-            $json->url,
-            $json->alt,
-            $json->copyright,
-            $json->dimensions->width,
-            $json->dimensions->height
+            (string)$json->at('url'),
+            (string)$json->at('alt'),
+            (string)$json->at('copyright'),
+            (int)$dimensions->at('width'),
+            (int)$dimensions->at('height')
         );
     }
 }

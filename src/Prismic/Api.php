@@ -11,7 +11,8 @@
 
 namespace Prismic;
 
-use Guzzle\Http\Client;
+use Prismic\Http\HttpClientInterface;
+use Prismic\Http\DefaultHttpClient;
 use Prismic\FieldForm;
 
 class Api
@@ -37,10 +38,10 @@ class Api
     public function refs(): ImmMap<string, Ref>
     {
         $refs = $this->data->getRefs();
-        $groupBy = new Map();
+        $groupBy = Map {};
         foreach ($refs as $ref) {
             $maybeGrouped = $groupBy->get($ref->getLabel());
-            if (isset($maybeGrouped)) {
+            if ($maybeGrouped) {
                 $maybeGrouped->add($ref);
                 $groupBy->set($ref->getLabel(), $maybeGrouped);
             } else {
@@ -109,43 +110,37 @@ class Api
      * @param Client $client
      * @return Api
      */
-    public static function get(string $action, string $accessToken=null, $client = null): Api
+    public static function get(string $action, ?string $accessToken=null, ?HttpClientInterface $client = null): Api
     {
-        $url = $action . ($accessToken ? '?access_token=' . $accessToken : '');
-        $client = isset($client) ? $client : self::defaultClient();
-        $request = $client->get($url);
-        $response = $request->send();
-
-        $response = @json_decode($response->getBody(true));
+        $url = $action . (is_null($accessToken) ? '?access_token=' . $accessToken : '');
+        $client = $client ? $client : self::defaultClient();
+        $response = $client->get($url);
 
         if (!$response) {
             throw new \RuntimeException('Unable to decode the json response');
         }
 
+        $refs = Tools::requireImmVector($response->at('refs'));
+        $bookmarks = Tools::requireImmMap($response->at('bookmarks'));
+        $types = Tools::requireImmMap($response->at('types'));
+        $tags = Tools::requireImmVector($response->at('tags'));
+        $forms = Tools::requireImmMap($response->at('forms'));
+
         $apiData = new ApiData(
-            (new ImmVector($response->refs))->map($ref ==> Ref::parse($ref)),
-            new ImmMap((array)$response->bookmarks),
-            new ImmMap((array)$response->types),
-            new ImmVector($response->tags),
-            (new ImmMap((array)$response->forms))->map($data ==> Form::parse($data)),
-            $response->oauth_initiate,
-            $response->oauth_token
+            $refs->map($ref ==> Ref::parse($ref)),
+            $bookmarks,
+            $types,
+            $tags,
+            $forms->map($data ==> Form::parse($data)),
+            (string)$response->at('oauth_initiate'),
+            (string)$response->at('oauth_token')
         );
 
         return new Api($apiData, $accessToken);
     }
 
-    public static function defaultClient()
+    public static function defaultClient(): HttpClientInterface
     {
-        // UNSAFE
-        return new Client('', array(
-            Client::CURL_OPTIONS => array(
-                \CURLOPT_CONNECTTIMEOUT => 10,
-                \CURLOPT_RETURNTRANSFER => true,
-                \CURLOPT_TIMEOUT        => 60,
-                \CURLOPT_USERAGENT      => 'prismic-php-0.1',
-                \CURLOPT_HTTPHEADER     => array('Accept: application/json')
-            )
-        ));
+        return new DefaultHttpClient();
     }
 }

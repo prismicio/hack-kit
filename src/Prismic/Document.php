@@ -52,7 +52,7 @@ class Document implements WithFragmentsInterface
         string $href,
         ImmVector<string> $tags,
         ImmVector<string> $slugs,
-        ImmMap<string, FragmentInterface> $fragments
+        ImmMap<string, FragmentInterface> $fragments = ImmMap {}
     ) {
         $this->id = $id;
         $this->type = $type;
@@ -66,13 +66,10 @@ class Document implements WithFragmentsInterface
         return $this->fragments;
     }
 
-    public function getSlug(): ?string
+    public function getSlug(): string
     {
-        if ($this->slugs->count() > 0) {
-            return $this->slugs->get(0);
-        }
-
-        return null;
+        $maybeSlug = $this->slugs->get(0);
+        return !is_null($maybeSlug) ? $maybeSlug : '-';
     }
 
     public function containsSlug(string $slug): bool
@@ -80,95 +77,110 @@ class Document implements WithFragmentsInterface
         return $this->slugs->toImmSet()->contains($slug);
     }
 
-    public static function parseFragment($json): ?FragmentInterface
+    public static function parseFragment(ImmMap<string, mixed> $json): ?FragmentInterface
     {
-        if (is_object($json) && property_exists($json, "type")) {
-            if ($json->type === "Image") {
-                $data = $json->value;
-                $views = new Map();
-                foreach ($json->value->views as $key => $jsonView) {
-                    $views->add(Pair {$key, ImageView::parse($jsonView)});
-                }
-                $mainView = ImageView::parse($data->main, $views);
+        if (!is_null($json->get('type'))) {
 
-                return new Image($mainView, $views->toImmMap());
+            $type = $json->at('type');
+            $value = $json->at('value');
+
+            if ($type === "Image") {
+                $value = Tools::requireImmMap($value);
+                $views = Tools::requireImmMap($value->at('views'))->mapWithKey(($key, $json) ==> {
+                    return ImageView::parse($json);
+                });
+                $main = Tools::requireImmMap($value->at('main'));
+                $mainView = ImageView::parse($main);
+                return new Image($mainView, $views);
             }
 
-            if ($json->type === "Color") {
-                return new Color($json->value);
+            if ($type === "Color") {
+                return new Color((string)$value);
             }
 
-            if ($json->type === "Number") {
-                return new Number($json->value);
+            if ($type === "Number") {
+                return new Number((float)$value);
             }
 
-            if ($json->type === "Date") {
-                return new Date($json->value);
+            if ($type === "Date") {
+                return new Date((string)$value);
             }
 
-            if ($json->type === "Text") {
-                return new Text($json->value);
+            if ($type === "Text") {
+                return new Text((string)$value);
             }
 
-            if ($json->type === "Select") {
-                return new Text($json->value);
+            if ($type === "Select") {
+                return new Text((string)$value);
             }
 
-            if ($json->type === "Embed") {
-                return Embed::parse($json->value);
+            if ($type === "Embed") {
+                $value = Tools::requireImmMap($value);
+                return Embed::parse($value);
             }
 
-            if ($json->type === "Link.web") {
-                return WebLink::parse($json->value);
+            if ($type === "Link.web") {
+                $value = Tools::requireImmMap($value);
+                return WebLink::parse($value);
             }
 
-            if ($json->type === "Link.document") {
-                return DocumentLink::parse($json->value);
+            if ($type === "Link.document") {
+                $value = Tools::requireImmMap($value);
+                return DocumentLink::parse($value);
             }
 
-            if ($json->type === "Link.file") {
-                return MediaLink::parse($json->value);
+            if ($type === "Link.file") {
+                $value = Tools::requireImmMap($value);
+                return MediaLink::parse($value);
             }
 
-            if ($json->type === "StructuredText") {
-                return StructuredText::parse($json->value);
+            if ($type === "StructuredText") {
+                $value = Tools::requireImmMap($value);
+                return StructuredText::parse($value);
             }
 
-            if ($json->type === "Group") {
-                return Group::parse($json->value);
+            if ($type === "Group") {
+                $value = Tools::requireImmMap($value);
+                return Group::parse($value);
             }
 
             return null;
         }
+        return null;
     }
 
-    public static function parse($json): Document
+    public static function parse(ImmMap<string, mixed> $json): Document
     {
-        $fragments = new Map();
-        foreach ($json->data as $type => $fields) {
+        $fragments = Map {};
+        $data = Tools::requireImmMap($json->at('data'));
+        foreach ($data as $type => $fields) {
+            $fields = Tools::requireImmMap($fields);
             foreach ($fields as $key => $value) {
                 if (is_array($value)) {
                     for ($i = 0; $i < count($value); $i++) {
                         $f = self::parseFragment($value[$i]);
-                        if (isset($f)) {
+                        if (!is_null($f)) {
                             $fragments->set($type . '.' . $key . '[' . $i . ']', $f);
                         }
                     }
                 } else {
                     $f = self::parseFragment($value);
-                    if (isset($f)) {
+                    if (!is_null($f)) {
                         $fragments->set($type . '.' . $key, $f);
                     }
                 }
             }
         }
 
+        $tags = Tools::requireImmVector($json->at('tags'));
+        $slugs = Tools::requireImmVector($json->at('slugs'));
+
         return new Document(
-            $json->id,
-            $json->type,
-            $json->href,
-            new ImmVector($json->tags),
-            new ImmVector($json->slugs),
+            (string)$json->at('id'),
+            (string)$json->at('type'),
+            (string)$json->at('href'),
+            $tags,
+            $slugs,
             $fragments->toImmMap()
         );
     }

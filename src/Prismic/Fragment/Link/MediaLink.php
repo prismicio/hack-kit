@@ -53,13 +53,14 @@ class MediaLink implements LinkInterface
         return $this->filename;
     }
 
-    public static function parse($json): MediaLink
+    public static function parse(ImmMap<string, mixed> $json): MediaLink
     {
+        $file = \Prismic\Tools::requireImmMap($json->at('file'));
         return new MediaLink(
-            $json->file->url,
-            $json->file->kind,
-            (int)$json->file->size,
-            $json->file->name
+            (string)$file->at('url'),
+            (string)$file->at('kind'),
+            (int)$file->at('size'),
+            (string)$file->at('name')
         );
     }
 }

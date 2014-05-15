@@ -39,8 +39,8 @@ class WebLink implements LinkInterface
         return $this->maybeContentType;
     }
 
-    public static function parse($json): WebLink
+    public static function parse(ImmMap<string, mixed> $json): WebLink
     {
-        return new WebLink($json->url);
+        return new WebLink((string)$json->at('url'));
     }
 }

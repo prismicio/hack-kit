@@ -9,11 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Prismic\Fragment\Span;
+namespace Prismic\Http;
 
-interface SpanInterface
+interface HttpClientInterface
 {
-    public function getStart(): int;
-
-    public function getEnd(): int;
+    public function get(string $url): ImmMap<string, mixed>;
 }

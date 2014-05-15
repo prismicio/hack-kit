@@ -45,12 +45,12 @@ class FieldForm
         return $this->multiple;
     }
 
-    public static function parse($json): FieldForm
+    public static function parse(ImmMap<string, mixed> $json): FieldForm
     {
         return new FieldForm(
-            $json->type,
-            isset($json->multiple) ? $json->multiple : false,
-            $json->default
+            (string)$json->at('type'),
+            (bool)(!is_null($json->get('multiple')) ? $json->at('multiple') : false),
+            (string)$json->at('default')
         );
     }
 }

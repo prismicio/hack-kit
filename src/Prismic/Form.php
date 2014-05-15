@@ -46,10 +46,11 @@ class Form
 
     public function defaultData(): ImmMap<string, ImmVector<string>>
     {
-        return $this->getFields()
-                    ->map($f ==> $f->getDefaultValue())
-                    ->filter($v ==> isset($v))
-                    ->map($value ==> new ImmVector(array($value)));
+        $defaults = $this->getFields()
+                         ->map($f ==> $f->getDefaultValue())
+                         ->filter($v ==> !is_null($v));
+
+        return $defaults->map($value ==> new ImmVector(array((string)$value)));
     }
 
     public function getName(): ?string
@@ -83,15 +84,16 @@ class Form
         return $this->fields;
     }
 
-    public static function parse($json): Form
+    public static function parse(ImmMap<string, mixed> $json): Form
     {
+        $fields = Tools::requireImmMap($json->at('fields'));
         return new Form(
-            $json->name,
-            $json->method,
-            $json->rel,
-            $json->enctype,
-            $json->action,
-            (new ImmMap((array)$json->fields))->map($data ==> FieldForm::parse($data))
+            (string)$json->at('name'),
+            (string)$json->at('method'),
+            (string)$json->at('rel'),
+            (string)$json->at('enctype'),
+            (string)$json->at('action'),
+            $fields->map($data ==> FieldForm::parse($data))
         );
     }
 }

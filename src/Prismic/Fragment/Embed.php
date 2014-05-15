@@ -22,7 +22,7 @@ class Embed implements FragmentInterface
     private ?int $maybeWidth;
     private ?int $maybeHeight;
     private ?string $maybeHtml;
-    private $oembedJson;
+    private ImmMap<string, mixed> $oembedJson;
 
     public function __construct(
         string $type,
@@ -31,7 +31,7 @@ class Embed implements FragmentInterface
         ?int $maybeWidth,
         ?int $maybeHeigth,
         ?string $maybeHtml,
-        $oembedJson
+        ImmMap<string, mixed> $oembedJson
     ) {
         $this->type = $type;
         $this->provider = $provider;
@@ -44,25 +44,27 @@ class Embed implements FragmentInterface
 
     public function asHtml(?LinkResolver $linkResolver = null): string
     {
-        if (isset($this->maybeHtml)) {
+        $type = (string)strtolower($this->type);
+        $provider = (string)strtolower($this->provider);
+        if (!is_null($this->maybeHtml)) {
             return '<div data-oembed="' . $this->url . '" data-oembed-type="' .
-                    strtolower($this->type) . '" data-oembed-provider="' .
-                    strtolower($this->provider) . '">' . $this->maybeHtml . '</div>';
+                    $type . '" data-oembed-provider="' . $provider . '">' . $this->maybeHtml . '</div>';
         } else {
             return "";
         }
     }
 
-    public static function parse($json): Embed
+    public static function parse(ImmMap<string, mixed> $json): Embed
     {
+        $oembed = \Prismic\Tools::requireImmMap($json->at('oembed'));
         return new Embed(
-            $json->oembed->type,
-            $json->oembed->provider_name,
-            $json->oembed->embed_url,
-            (int)$json->oembed->width,
-            (int)$json->oembed->height,
-            $json->oembed->html,
-            $json->oembed
+            (string)$oembed->at('type'),
+            (string)$oembed->at('provider_name'),
+            (string)$oembed->at('embed_url'),
+            (int)$oembed->get('width'),
+            (int)$oembed->get('height'),
+            (string)$oembed->get('html'),
+            $oembed
         );
     }
 }

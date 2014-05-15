@@ -11,6 +11,8 @@
 
 namespace Prismic\Fragment;
 
+use Prismic\LinkResolver;
+
 class Number implements FragmentInterface
 {
     private float $value;
@@ -29,7 +31,7 @@ class Number implements FragmentInterface
         return (int)$this->value;
     }
 
-    public function asHtml($linkResolver = null): string
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
         return '<span class="number">' . $this->value . '</span>';
     }

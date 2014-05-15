@@ -22,7 +22,7 @@ class Date implements FragmentInterface
         $this->value = $value;
     }
 
-    public function asHtml(?LinkResolver $linkResolver = null)
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
         return '<time>' . $this->value . '</time>';
     }

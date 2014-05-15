@@ -1,7 +1,7 @@
 <?hh // strict
 
 /*
- * This file is part of the Prismic PHP SDK
+ * This file is part of the Prismic hack SDK
  *
  * Copyright 2013 Zengularity (http://www.zengularity.com).
  *
@@ -10,6 +10,8 @@
  */
 
 namespace Prismic\Fragment;
+
+use Prismic\LinkResolver;
 
 class Text implements FragmentInterface
 {
@@ -24,8 +26,8 @@ class Text implements FragmentInterface
         return $this->value;
     }
 
-    public function asHtml($linkResolver = null): string
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
-        return '<span class="text">' . nl2br(htmlentities($this->value)) . '</span>';
+        return '<span class="text">' .(string)nl2br(htmlentities($this->value)) . '</span>';
     }
 }

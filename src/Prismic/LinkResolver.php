@@ -29,11 +29,6 @@ abstract class LinkResolver
      */
     abstract public function resolve(DocumentLink $link): string;
 
-    public function __invoke($link)
-    {
-        return $this->resolve($link);
-    }
-
     /**
      * Returns the application-specific URL related to this Document
      *

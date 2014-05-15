@@ -62,7 +62,7 @@ class StructuredTextTest extends \PHPUnit_Framework_TestCase
     public function testPreformattedBlockEscapeRendering()
     {
         $text = "This is <a> test.";
-        $bloc = new \Prismic\Fragment\Block\PreformattedBlock($text, new ImmVector());
+        $bloc = new \Prismic\Fragment\Block\PreformattedBlock($text);
         $structuredText = new \Prismic\Fragment\StructuredText(new ImmVector(array($bloc)));
         $content = "<pre>This is &lt;a&gt; test.</pre>";
         $this->assertEquals($content, $structuredText->asHtml());
@@ -71,7 +71,7 @@ class StructuredTextTest extends \PHPUnit_Framework_TestCase
     public function testPreformattedBlockHtmlHasNoExtraBreakTags()
     {
         $text = "This pre block has\ntwo lines and a break tag shouldn't be added.";
-        $bloc = new \Prismic\Fragment\Block\PreformattedBlock($text, new ImmVector(), null);
+        $bloc = new \Prismic\Fragment\Block\PreformattedBlock($text);
         $structuredText = new \Prismic\Fragment\StructuredText(new ImmVector(array($bloc)));
         $this->assertRegExp('/block has\ntwo lines/', $structuredText->asHtml());
     }

@@ -43,43 +43,40 @@ class StructuredText implements FragmentInterface
         return $this->blocks;
     }
 
-    public function asText(): string
-    {
-        $result = $this->blocks->map($block ==> $block->getText());
-
-        return join("\n\n", $result);
-    }
-
     public function getFirstPreformatted(): ?PreformattedBlock
     {
         foreach ($this->blocks as $block) {
-            if (isset($block) && $block instanceof PreformattedBlock) {
-                return $block;
-            }
+            if ($block)
+                if($block instanceof PreformattedBlock) {
+                    return $block;
+                }
         }
+        return null;
     }
 
     public function getFirstParagraph(): ?ParagraphBlock
     {
         foreach ($this->blocks as $block) {
-            if (isset($block) && $block instanceof ParagraphBlock) {
+            if ($block && $block instanceof ParagraphBlock) {
                 return $block;
             }
         }
+        return null;
     }
 
     public function getFirstImage(): ?ImageBlock
     {
         foreach ($this->blocks as $block) {
-            if (isset($block) && $block instanceof ImageBlock) {
+            if ($block && $block instanceof ImageBlock) {
                 return $block;
             }
         }
+        return null;
     }
 
     public function asHtml(?LinkResolver $linkResolver = null): string
     {
-        $groups = new Vector();
+        $groups = Vector {};
         foreach ($this->blocks as $block) {
             $count = count($groups);
             if ($count > 0) {
@@ -108,7 +105,7 @@ class StructuredText implements FragmentInterface
         $html = "";
         foreach ($groups as $group) {
             $maybeTag = $group->getTag();
-            if (isset($maybeTag)) {
+            if (!is_null($maybeTag)) {
                 $html = $html . "<" . $group->getTag() . ">";
                 foreach ($group->getBlocks() as $block) {
                     $html = $html . StructuredText::asHtmlBlock($block, $linkResolver);
@@ -124,7 +121,7 @@ class StructuredText implements FragmentInterface
         return $html;
     }
 
-    public static function asHtmlBlock(BlockInterface $block, ?LinkResolver $linkResolver = null)
+    public static function asHtmlBlock(BlockInterface $block, ?LinkResolver $linkResolver = null): string
     {
         if ($block instanceof HeadingBlock) {
             return nl2br('<h' . $block->getLevel() . '>' .
@@ -147,89 +144,94 @@ class StructuredText implements FragmentInterface
         return "";
     }
 
-    public static function asHtmlText(string $text, $spans, ?LinkResolver $linkResolver = null): ?string
+    public static function asHtmlText(string $text, ImmVector<SpanInterface> $spans, ?LinkResolver $linkResolver = null): ?string
     {
-        if (empty($spans)) {
+        if ($spans->isEmpty()) {
             return htmlspecialchars($text);
         }
 
         $doc = new \DOMDocument();
+
         $doc->appendChild($doc->createTextNode($text));
-
-        $iterateChildren = null;
-        $iterateChildren = ($node, $start, $span) ==> {
-            $nodeLength = mb_strlen($node->textContent);
-
-            // If this is a text node we have found the right node
-            if ($node instanceof \DOMText) {
-                if ($span->getEnd() - $span->getStart() > $nodeLength) {
-                    return null;
-                }
-
-                // Split the text node into a head, meat and tail
-                $meat = $node->splitText($span->getStart() - $start);
-                $tail = $meat->splitText($span->getEnd() - $span->getStart());
-
-                // Decide element type and attributes based on span class
-                $attributes = array();
-                if ($span instanceof StrongSpan) {
-                    $nodeName = 'strong';
-                } else if ($span instanceof EmSpan) {
-                    $nodeName = 'em';
-                } else if ($span instanceof HyperlinkSpan) {
-                    $nodeName = 'a';
-                    if ($span->getLink() instanceof DocumentLink) {
-                        $attributes['href'] = $linkResolver ? $linkResolver($span->getLink()) : '';
-                    } else {
-                        $attributes['href'] = $span->getLink()->getUrl();
-                    }
-                } else {
-                    $nodeName = 'span';
-                }
-
-                // Make the new span element, and put the text from the meat
-                // inside
-                $spanNode = $node->ownerDocument->createElement($nodeName, htmlspecialchars($meat->textContent));
-                foreach ($attributes as $k => $v) {
-                    $spanNode->setAttribute($k, $v);
-                }
-
-                // Replace the original meat text node with the span
-                $meat->parentNode->replaceChild($spanNode, $meat);
-
-                return null;
-            }
-
-            // Skip this node if the span start is beyond it
-            if ($span->getStart() >= $start + mb_strlen($node->textContent)) {
-                return null;
-            }
-
-            // Loop over child nodes to find the correct one
-            if ($node->childNodes) {
-                foreach ($node->childNodes as $child) {
-                    $nodeLength = mb_strlen($child->textContent);
-                    if ($span->getStart() < $start + $nodeLength) {
-                        // This is the right node -- recurse
-                        return $iterateChildren($child, $start, $span);
-                    }
-                    $start += $nodeLength;
-                }
-            }
-
-            // Not found
-            return null;
-        };
 
         foreach ($spans as $span) {
             if ($span->getEnd() < $span->getStart()) {
                 continue;
             }
-            $iterateChildren($doc, 0, $span);
+            self::asHtmlTextChildren($doc, 0, $span, $linkResolver);
         }
 
         return trim($doc->saveHTML());
 
+    }
+
+    private static function asHtmlTextChildren(\DOMNode $node, int $start, SpanInterface $span, ?LinkResolver $linkResolver): ?string {
+
+        $nodeLength = mb_strlen($node->textContent);
+
+        // If this is a text node we have found the right node
+        if ($node instanceof \DOMText) {
+
+            if ($span->getEnd() - $span->getStart() > $nodeLength) {
+                return null;
+            }
+
+            // Split the text node into a head, meat and tail
+            $meat = $node->splitText($span->getStart() - $start);
+            $tail = $meat->splitText($span->getEnd() - $span->getStart());
+
+            // Decide element type and attributes based on span class
+            $attributes = array();
+            if ($span instanceof StrongSpan) {
+                $nodeName = 'strong';
+            } else if ($span instanceof EmSpan) {
+                $nodeName = 'em';
+            } else if ($span instanceof HyperlinkSpan) {
+                $nodeName = 'a';
+                $link = $span->getLink();
+                if ($link instanceof DocumentLink) {
+                    $attributes['href'] = $linkResolver ? $linkResolver->resolve($link) : '';
+                } elseif($link instanceof MediaLink) {
+                    $attributes['href'] = $link->getUrl();
+                } elseif($link instanceof WebLink) {
+                    $attributes['href'] = $link->getUrl();
+                }
+            } else {
+                $nodeName = 'span';
+            }
+
+            // Make the new span element, and put the text from the meat
+            // inside
+            $spanNode = $node->ownerDocument->createElement($nodeName, htmlspecialchars($meat->textContent));
+            foreach ($attributes as $k => $v) {
+                $spanNode->setAttribute($k, $v);
+            }
+
+            // Replace the original meat text node with the span
+            $meat->parentNode->replaceChild($spanNode, $meat);
+
+            return null;
+        }
+
+        // Skip this node if the span start is beyond it
+        if ($span->getStart() >= $start + mb_strlen($node->textContent)) {
+            return null;
+        }
+
+        // Loop over child nodes to find the correct one
+        if ($node->childNodes) {
+            foreach ($node->childNodes as $child) {
+                $nodeLength = mb_strlen($child->textContent);
+                if ($span->getStart() < $start + $nodeLength) {
+                    // This is the right node -- recurse
+                    return self::asHtmlTextChildren($child, $start, $span);
+                }
+                $start += $nodeLength;
+            }
+        }
+
+        // Not found
+        return null;
     }
 
     public static function parseSpan($json): ?SpanInterface
@@ -340,7 +342,7 @@ class StructuredText implements FragmentInterface
         return null;
     }
 
-    public static function parse($json): StructuredText
+    public static function parse(ImmMap<string, mixed> $json): StructuredText
     {
         $blocks = new Vector();
         foreach ($json as $blockJson) {

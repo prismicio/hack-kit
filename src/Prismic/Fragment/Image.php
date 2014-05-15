@@ -17,12 +17,12 @@ use Prismic\Fragment\ImageView;
 class Image implements FragmentInterface
 {
     private ImageView $main;
-    private ?ImmMap<string, ImageView> $views;
+    private ImmMap<string, ImageView> $views;
 
-    public function __construct(ImageView $main, ?ImmMap<string, ImageView> $views = null)
+    public function __construct(ImageView $main, ImmMap<string, ImageView> $views = ImmMap {})
     {
         $this->main = $main;
-        $this->views = isset($views) ? $views : new ImmMap();
+        $this->views = $views;
     }
 
     public function asHtml(?LinkResolver $linkResolver = null): string
@@ -30,13 +30,13 @@ class Image implements FragmentInterface
         return $this->main->asHtml();
     }
 
-    public function getView($key): ?ImageView
+    public function getView(string $key): ?ImageView
     {
         if (strtolower($key) == "main") {
             return $this->main;
         }
 
-        return $this->views[$key];
+        return $this->views->get($key);
     }
 
     public function getMain(): ImageView

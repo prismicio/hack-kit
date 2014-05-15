@@ -31,19 +31,26 @@ class DocumentLink implements LinkInterface
         $this->isBroken = $isBroken;
     }
 
-    public function asHtml(LinkResolver $linkResolver): string
+    public function asHtml(?LinkResolver $linkResolver = null): string
     {
-        return '<a href="' . $linkResolver($this) . '">' . $this->slug . '</a>';
+        if($linkResolver) {
+            $href = $linkResolver->resolve($this);
+        } else {
+            return $href = "#";
+        }
+        return '<a href="' . $href . '">' . $this->slug . '</a>';
     }
 
-    public static function parse($json): DocumentLink
+    public static function parse(ImmMap<string, mixed> $json): DocumentLink
     {
+        $document = \Prismic\Tools::requireImmMap($json);
+        $tags = is_null($document->at('tags')) ? \Prismic\Tools::requireImmVector($document->at('tags')) : ImmVector {};
         return new DocumentLink(
-            $json->document->id,
-            $json->document->type,
-            isset($json->document->tags) ? new ImmVector($json->document->tags) : new ImmVector(),
-            $json->document->slug,
-            $json->isBroken
+            (string)$document->at('id'),
+            (string)$document->at('type'),
+            $tags,
+            (string)$document->at('slug'),
+            (bool)$json->at('isBroken')
         );
     }
 

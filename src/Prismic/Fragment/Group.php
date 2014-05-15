@@ -28,21 +28,11 @@ class Group implements FragmentInterface
     {
         $string = "";
         foreach ($this->docs as $subfragments) {
-            foreach ($subfragments as $subfragment_name => $subfragment) {
-                $string .= "<section data-field=\"$subfragment_name\">" .
-                           $subfragment->asHtml($linkResolver) .
-                           "</section>";
-            }
-        }
-        return $string;
-    }
-
-    public function asText(): string
-    {
-        $string = "";
-        foreach ($this->array as $subfragments) {
-            foreach ($subfragments as $subfragment_name => $subfragment) {
-                $string .= $subfragment->asText();
+            foreach ($subfragments as $name => $subfragment) {
+                if($subfragment instanceof FragmentInterface) {
+                    $html = $subfragment->asHtml($linkResolver);
+                    $string .= "<section data-field=\"$name\">" . $html . "</section>";
+                }
             }
         }
         return $string;
@@ -53,12 +43,13 @@ class Group implements FragmentInterface
         return $this->docs;
     }
 
-    public static function parseSubfragments($json): ImmMap<string, FragmentInterface>
+    public static function parseSubfragments(ImmMap<string, mixed> $json): ImmMap<string, FragmentInterface>
     {
-        $subfragments = new Map();
+        $subfragments = Map {};
         foreach ($json as $name => $value) {
+            $value = \Prismic\Tools::requireImmMap($value);
             $f = Document::parseFragment($value);
-            if (isset($f)) {
+            if (!is_null($f)) {
                 $subfragments->add(Pair { $name, $f });
             }
         }
@@ -66,10 +57,11 @@ class Group implements FragmentInterface
         return $subfragments->toImmMap();
     }
 
-    public static function parse($json): Group
+    public static function parse(ImmMap<string, mixed> $json): Group
     {
-        $results = new Vector();
+        $results = Vector {};
         foreach ($json as $subfragments) {
+            $subfragments = \Prismic\Tools::requireImmMap($subfragments);
             $fs = Group::parseSubfragments($subfragments);
             $results->add($fs);
         }

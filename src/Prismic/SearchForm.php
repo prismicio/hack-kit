@@ -32,35 +32,35 @@ class SearchForm
     public function set(string $key, string $value): SearchForm
     {
         $maybeField = $this->form->getFields()->get($key);
-        if(isset($maybeField)) {
+        if($maybeField) {
             $values = new Vector(array($value));
             if($maybeField->isMultiple()) {
                 $alreadyThere = $this->data->get($key);
-                if(isset($alreadyThere)) {
+                if($alreadyThere) {
                     $values->addAll($alreadyThere);
                 }
             }
             return new SearchForm(
                 clone $this->api,
                 clone $this->form,
-                $this->data->toMap()->add(Pair{$key, $values})->toImmMap()
+                $this->data->toMap()->add(Pair{$key, $values->toImmVector()})->toImmMap()
             );
         } else {
-            throw new \RuntimeException("Unknown field " . $maybeField);
+            throw new \RuntimeException("Unknown field " . $key);
         }
     }
 
-    public function setInt(string $key, int $value)
+    public function setInt(string $key, int $value): SearchForm
     {
         $maybeField = $this->form->getFields()->get($key);
-        if(isset($maybeField)) {
-            if($maybeField->type == 'Integer') {
-                $this->set($key, $value->toString());
+        if($maybeField) {
+            if($maybeField->getType() == 'Integer') {
+                return $this->set($key, (string)$value);
             } else {
-                throw new \RuntimeException("Cannot use a int as value for the field" . $maybeField . "of type"  . $maybeField->type);
+                throw new \RuntimeException("Cannot use a int as value for the field" . $key . "of type"  . $maybeField->getType());
             }
         } else {
-            throw new \RuntimeException("Unknown field " . $maybeField);
+            throw new \RuntimeException("Unknown field " . $key);
         }
     }
 
@@ -106,7 +106,7 @@ class SearchForm
      */
     public function orderings(string $orderings): SearchForm
     {
-        return $this->setInt("orderings", $orderings);
+        return $this->set("orderings", $orderings);
     }
 
     /**
@@ -116,9 +116,11 @@ class SearchForm
      *
      * @return ImmVector
      */
-    private static function parseResult($json): ImmVector<Document>
+    private static function parseResult(ImmMap<string, mixed> $json): ImmVector<Document>
     {
-        return (new ImmVector($json->results))->map($doc ==> Document::parse($doc));
+        $docs = $json->at('results');
+        $docs = ($docs instanceof KeyedTraversable) ? $docs : array();
+        return (new ImmVector($docs))->map($doc ==> Document::parse($doc));
     }
 
     /**
@@ -146,7 +148,7 @@ class SearchForm
      */
     public function count(): int
     {
-        return $this->pageSize(1)->submit_raw()->total_results_size;
+        return (int)$this->pageSize(1)->submit_raw()->at('total_results_size');
     }
 
     /**
@@ -170,12 +172,9 @@ class SearchForm
         } else {
             // Temporary Hack for backward compatibility
             $maybeDefault = property_exists($field, "defaultValue") ? $field->getDefaultValue() : null;
-            $q1 = $maybeDefault ? self::strip($maybeDefault) : "";
+            $q1 = !is_null($maybeDefault) ? self::strip($maybeDefault) : "";
 
-            $data = $this->data;
-            $data['q'] = '[' . $q1 . self::strip($q) . ']';
-
-            return new SearchForm($this->api, $this->form, $data);
+            return $this->set('q', '[' . $q1 . self::strip($q) . ']');
         }
     }
 
@@ -184,20 +183,18 @@ class SearchForm
      *
      * @return the raw (unparsed) response
      */
-    private function submit_raw()
+    private function submit_raw(): ImmMap<string, mixed>
     {
         if ($this->form->getMethod() == 'GET' &&
             $this->form->getEnctype() == 'application/x-www-form-urlencoded' &&
             $this->form->getAction()
         ) {
-            $url = $this->form->getAction() . '?' . http_build_query($this->data);
+            $url = $this->form->getAction() . '?' . (string)http_build_query($this->data);
             $url = preg_replace('/%5B(?:[0-9]|[1-9][0-9]+)%5D=/', '=', $url);
 
-            $request = Api::defaultClient()->get($url);
-            $response = $request->send();
+            $response = Api::defaultClient()->get($url);
 
-            $response = @json_decode($response->getBody(true));
-            if (!isset($response)) {
+            if (!$response) {
                 throw new \RuntimeException("Unable to decode json response");
             }
 

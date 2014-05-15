@@ -84,6 +84,6 @@ interface SprintfQuote {
   public function format_0x3d() : PlainSprintf;
 }
 
-function sprintf(FormatString<PlainSprintf> $f, ...) : string;
+function sprintf(string<PlainSprintf> $f, ...) : string;
 function printf(FormatString<PlainSprintf> $f, ...) : void;
 

@@ -11,6 +11,10 @@
 
 namespace Prismic\Fragment;
 
+use Prismic\LinkResolver;
+
 interface FragmentInterface
 {
+
+    public function asHtml(?LinkResolver $linkResolver = null): string;
 }
