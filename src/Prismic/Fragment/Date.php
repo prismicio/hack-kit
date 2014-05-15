@@ -27,6 +27,10 @@ class Date implements FragmentInterface
         return '<time>' . $this->value . '</time>';
     }
 
+    public function getValue(): string {
+        return $this->value;
+    }
+
     public function asText(): string
     {
         return $this->value;

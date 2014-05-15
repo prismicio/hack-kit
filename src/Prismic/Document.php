@@ -27,10 +27,8 @@ use Prismic\Fragment\Group;
 use Prismic\Fragment\Block\ImageBlock;
 use Prismic\Fragment\Block\TextInterface;
 
-class Document implements WithFragmentsInterface
+class Document
 {
-    use WithFragments;
-
     private string $id;
     private string $type;
     private string $href;
@@ -60,10 +58,6 @@ class Document implements WithFragmentsInterface
         $this->tags = $tags;
         $this->slugs = $slugs;
         $this->fragments = $fragments;
-    }
-
-    public function fragments(): ImmMap<string, FragmentInterface> {
-        return $this->fragments;
     }
 
     public function getSlug(): string
@@ -208,5 +202,220 @@ class Document implements WithFragmentsInterface
     public function getSlugs(): ImmVector<string>
     {
         return $this->slugs;
+    }
+
+    public function has(string $field): bool
+    {
+        return $this->fragments->containsKey($field);
+    }
+
+    public function get(string $field): ?FragmentInterface {
+        $maybeFragment = $this->fragments->get($field);
+        if($maybeFragment) {
+            return $maybeFragment;
+        } else {
+            return $this->getAll($field)->get(0);
+        }
+    }
+
+    public function getAll(string $field): ImmVector<FragmentInterface> {
+        $indexedKey = '/^([^\[]+)(\[\d+\])?$/';
+        return $this->fragments
+                    ->filterWithKey(($key, $value) ==> {
+                        $groups = null;
+                        if (preg_match($indexedKey, $key, $groups) == 1) {
+                            return !is_null($groups) && $groups[1] == $field;
+                        } else {
+                            return false;
+                        }
+                      })
+                    ->values()
+                    ->toImmVector();
+    }
+
+    public function getText(string $field): ?string
+    {
+        $fragment = $this->get($field);
+        if ($fragment && $fragment instanceof StructuredText) {
+            $text = "";
+            foreach ($fragment->getBlocks() as $block) {
+                if ($block instanceof TextInterface) {
+                    $text = $text . $block->getText();
+                    $text = $text . "\n";
+                }
+            }
+            return trim($text);
+        } elseif ($fragment && $fragment instanceof Number) {
+            return (string)$fragment->getValue();
+        } elseif ($fragment && $fragment instanceof Color) {
+            return $fragment->getHexValue();
+        } elseif ($fragment && $fragment instanceof Text) {
+            return $fragment->getValue();
+        } elseif ($fragment && $fragment instanceof Date) {
+            return $fragment->getValue();
+        }
+
+        return "";
+    }
+
+    public function getNumber(string $field): ?Number
+    {
+        $fragment = $this->get($field);
+        if ($fragment && $fragment instanceof Number) {
+            return $fragment;
+        }
+
+        return null;
+    }
+
+    public function getNumberAs(string $field, string $pattern): ?string
+    {
+        $fragment = $this->get($field);
+        if ($fragment && $fragment instanceof Number) {
+            if ($pattern && $fragment) {
+                return $fragment->asText($pattern);
+            }
+        }
+
+        return null;
+    }
+
+    public function getBoolean(string $field): ?bool
+    {
+        $fragment = $this->get($field);
+        if ($fragment && $fragment instanceof Text) {
+            $value = strtolower($fragment->getValue());
+            return in_array(strtolower($fragment->getValue()), array(
+                'yes',
+                'true',
+            ));
+        }
+
+        return null;
+    }
+
+    public function getDate(string $field): ?Date
+    {
+        $fragment = $this->get($field);
+        if ($fragment && $fragment instanceof Date) {
+            return $fragment;
+        }
+
+        return null;
+    }
+
+    public function getDateAs(string $field, ?string $pattern = null): ?string
+    {
+        $fragment = $this->get($field);
+        if ($fragment && $fragment instanceof Date) {
+            if (!is_null($pattern)) {
+                return $fragment->formatted($pattern);
+            }
+        }
+
+        return null;
+    }
+
+    public function getHtml(string $field, ?LinkResolver $linkResolver = null): string
+    {
+        $fragment = $this->get($field);
+        if ($fragment && method_exists($fragment, 'asHtml')) {
+            return $fragment->asHtml($linkResolver);
+        }
+
+        return "";
+    }
+
+    public function getImage(string $field): ?Image
+    {
+        $fragment = $this->get($field);
+        if ($fragment && $fragment instanceof Image) {
+            return $fragment;
+        } elseif ($fragment && $fragment instanceof StructuredText) {
+            foreach ($fragment->getBlocks() as $block) {
+                if ($block instanceof ImageBlock) {
+                    return new Image($block->getView());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public function getAllImages(string $field): ImmVector<Image>
+    {
+        $fragments = $this->getAll($field);
+        $images = Vector {};
+        foreach ($fragments as $fragment) {
+            if ($fragment && $fragment instanceof Image) {
+                $images->add($fragment);
+            } elseif ($fragment && $fragment instanceof StructuredText) {
+                foreach ($fragment->getBlocks() as $block) {
+                    if ($block instanceof ImageBlock) {
+                        $images->add(new Image($block->getView()));
+                    }
+                }
+            }
+        }
+
+        return $images->toImmVector();
+    }
+
+    public function getImageView(string $field, string $view): ?ImageView
+    {
+        $fragment = $this->get($field);
+        if ($fragment && $fragment instanceof Image) {
+            return $fragment->getView($view);
+        } elseif ($fragment && $fragment instanceof StructuredText && $view == 'main') {
+            $maybeImage = $this->getImage($field);
+            if ($maybeImage) {
+                return $maybeImage->getMain();
+            }
+        }
+
+        return null;
+    }
+
+    public function getAllImageViews(string $field, string $view): ImmVector<ImageView>
+    {
+        $imageViews = Vector {};
+        foreach ($this->getAllImages($field) as $image) {
+            $imageView = $image->getView($view);
+            if ($imageView) {
+                $imageViews->add($imageView);
+            }
+        };
+
+        return $imageViews->toImmVector();
+    }
+
+    public function getStructuredText(string $field): ?StructuredText
+    {
+        $fragment = $this->get($field);
+        if ($fragment && $fragment instanceof StructuredText) {
+            return $fragment;
+        }
+
+        return null;
+    }
+
+    public function getGroup(string $field): ?Group
+    {
+        $fragment = $this->get($field);
+        if ($fragment && $fragment instanceof Group) {
+            return $fragment;
+        }
+
+        return null;
+    }
+
+    public function asHtml(?LinkResolver $linkResolver = null): string
+    {
+        $html = "";
+        foreach ($this->fragments as $field => $v) {
+            $html = $html . '<section data-field="' . $field . '">' . $this->getHtml($field, $linkResolver) . '</section>';
+        };
+
+        return $html;
     }
 }
