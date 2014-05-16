@@ -50,7 +50,7 @@ class FieldForm
         return new FieldForm(
             (string)$json->at('type'),
             (bool)(!is_null($json->get('multiple')) ? $json->at('multiple') : false),
-            (string)$json->at('default')
+            (string)$json->get('default')
         );
     }
 }

@@ -1,53 +1,58 @@
-<?php
+<?hh
 
 namespace Prismic\Test;
 
 use Prismic\Document;
+use \Prismic\Fragment\ImageView;
 use DOMDocument;
 use DOMXpath;
 
 class ImageViewTest extends \PHPUnit_Framework_TestCase
 {
 
-    protected $input;
+    protected $inputs;
 
     protected function setUp()
     {
-        $search = json_decode(file_get_contents(__DIR__.'/../fixtures/search.json'));
-        $document = Document::parse($search[0]);
-        $gallery = $document->get('product.gallery');
-        $views = array_values($gallery->getViews());
-        $views[] = $gallery->getMain();
-        $this->input = array();
-        foreach ($views as $view) {
-            $dom = new DOMDocument;
-            $this->input[] = array(
-                'view' => $view,
-                'parsed' => $dom->loadHTML($view->asHtml()),
-                'dom' => $dom,
-            );
+        $search = json_decode(file_get_contents(__DIR__.'/../fixtures/search.json'), true);
+        $document = Document::parse(new ImmMap($search[0]));
+        $gallery = $document->getImage('product.gallery');
+        if($gallery) {
+            $views = $gallery->getViews()->values()->toVector();
+            $views->add($gallery->getMain());
+            $this->inputs = Vector {};
+            foreach ($views as $view) {
+                $dom = new DOMDocument();
+                $parsed = $dom->loadHTML($view->asHtml());
+                if($this->inputs) {
+                    $this->inputs->add(tuple($view, $parsed, $dom));
+                }
+            }
         }
     }
 
     public function testStartsWithImg()
     {
-        foreach ($this->input as $input) {
-            $this->assertRegExp('/^<img\b/', $input['view']->asHtml());
+        foreach ($this->inputs as $input) {
+            $view = $input[0];
+            $this->assertRegExp('/^<img\b/', $view->asHtml());
         }
     }
 
     public function testParsable()
     {
-        foreach ($this->input as $input) {
-            $this->assertNotNull($input['parsed']);
+        foreach ($this->inputs as $input) {
+            $parsed = $input[1];
+            $this->assertTrue($parsed);
         }
     }
 
     public function testExactlyOneImage()
     {
         $imgs = array();
-        foreach ($this->input as $input) {
-            $xpath = new DOMXpath($input['dom']);
+        foreach ($this->inputs as $input) {
+            $dom = $input[2];
+            $xpath = new DOMXpath($dom);
             $results = $xpath->query('//img');
             $this->assertEquals($results->length, 1);
             $imgs[] = $results->item(0);
@@ -72,38 +77,16 @@ class ImageViewTest extends \PHPUnit_Framework_TestCase
     public function testAttributes(array $imgs)
     {
         foreach ($imgs as $index => $img) {
+            $input = $this->inputs->at($index);
+            $view = $input[0];
             $this->assertTrue($img->hasAttribute('src'));
-            $this->assertEquals($img->getAttribute('src'), $this->input[$index]['view']->getUrl());
+            $this->assertEquals($img->getAttribute('src'), $view->getUrl());
             $this->assertTrue($img->hasAttribute('width'));
-            $this->assertEquals($img->getAttribute('width'), $this->input[$index]['view']->getWidth());
+            $this->assertEquals($img->getAttribute('width'), $view->getWidth());
             $this->assertTrue($img->hasAttribute('height'));
-            $this->assertEquals($img->getAttribute('height'), $this->input[$index]['view']->getHeight());
+            $this->assertEquals($img->getAttribute('height'), $view->getHeight());
             $this->assertTrue($img->hasAttribute('alt'));
-            $this->assertEquals($img->getAttribute('alt'), $this->input[$index]['view']->getAlt());
+            $this->assertEquals($img->getAttribute('alt'), $view->getAlt());
         }
     }
-
-    public function testExtraAttribute()
-    {
-        $html = $this->input[0]['view']->asHtml(null, array('data-test' => 'attribute value'));
-        $dom = new DOMDocument;
-        $dom->loadHTML($html);
-        $xpath = new DOMXpath($dom);
-        $results = $xpath->query('//img');
-        $img = $results->item(0);
-        $this->assertTrue($img->hasAttribute('data-test'));
-        $this->assertEquals($img->getAttribute('data-test'), 'attribute value');
-    }
-
-    public function testOverriddenAttribute()
-    {
-        $html = $this->input[0]['view']->asHtml(null, array('alt' => 'overridden value'));
-        $dom = new DOMDocument;
-        $dom->loadHTML($html);
-        $xpath = new DOMXpath($dom);
-        $results = $xpath->query('//img');
-        $img = $results->item(0);
-        $this->assertEquals($img->getAttribute('alt'), 'overridden value');
-    }
-
 }

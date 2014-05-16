@@ -46,10 +46,9 @@ class StructuredText implements FragmentInterface
     public function getFirstPreformatted(): ?PreformattedBlock
     {
         foreach ($this->blocks as $block) {
-            if ($block)
-                if($block instanceof PreformattedBlock) {
-                    return $block;
-                }
+            if($block instanceof PreformattedBlock) {
+                return $block;
+            }
         }
         return null;
     }
@@ -224,7 +223,7 @@ class StructuredText implements FragmentInterface
                 $nodeLength = mb_strlen($child->textContent);
                 if ($span->getStart() < $start + $nodeLength) {
                     // This is the right node -- recurse
-                    return self::asHtmlTextChildren($child, $start, $span);
+                    return self::asHtmlTextChildren($child, $start, $span, $linkResolver);
                 }
                 $start += $nodeLength;
             }
@@ -234,11 +233,11 @@ class StructuredText implements FragmentInterface
         return null;
     }
 
-    public static function parseSpan($json): ?SpanInterface
+    public static function parseSpan(ImmMap<string, mixed> $json): ?SpanInterface
     {
-        $type = $json->type;
-        $start = $json->start;
-        $end = $json->end;
+        $type = (string)$json->at('type');
+        $start = (int)$json->at('start');
+        $end = (int)$json->at('end');
 
         if ("strong" == $type) {
             return new StrongSpan($start, $end);
@@ -250,13 +249,15 @@ class StructuredText implements FragmentInterface
 
         $link = false;
         if ("hyperlink" == $type) {
-            $linkType = $json->data->type;
+            $data = \Prismic\Tools::requireImmMap($json->at('data'));
+            $linkType = $data->at('type');
+            $value = \Prismic\Tools::requireImmMap($data->at('value'));
             if ("Link.web" == $linkType) {
-                $link = WebLink::parse($json->data->value);
+                $link = WebLink::parse($value);
             } elseif ("Link.document" == $linkType) {
-                $link = DocumentLink::parse($json->data->value);
+                $link = DocumentLink::parse($value);
             } elseif ("Link.file" == $linkType) {
-                $link = MediaLink::parse($json->data->value);
+                $link = MediaLink::parse($value);
             }
         }
 
@@ -267,76 +268,77 @@ class StructuredText implements FragmentInterface
         return null;
     }
 
-    public static function parseText($json): ParsedText
+    public static function parseText(ImmMap<string, mixed> $json): ParsedText
     {
-        $text = $json->text;
-        $spans = new Vector();
-        foreach ($json->spans as $spanJson) {
-            $span = StructuredText::parseSpan($spanJson);
-            if (isset($span)) {
-                $spans->add($span);
-            }
-        }
+        $text = (string)$json->at('text');
+        $spans = \Prismic\Tools::requireImmVector($json->at('spans'));
+        $parsed = $spans->map($span ==> {
+            return StructuredText::parseSpan(\Prismic\Tools::requireImmMap($span));
+        })->filter($span ==> !is_null($span));
 
-        return new ParsedText($text, $spans->toImmVector());
+        return new ParsedText($text, $parsed->toImmVector());
     }
 
-    public static function parseBlock($json): ?BlockInterface
+    public static function parseBlock(ImmMap<string, mixed> $json): ?BlockInterface
     {
-        if ($json->type == 'heading1') {
+        $type = (string)$json->at('type');
+        if ($type == 'heading1') {
             $p = StructuredText::parseText($json);
 
             return new HeadingBlock($p->getText(), $p->getSpans(), 1);
         }
 
-        if ($json->type == 'heading2') {
+        if ($type == 'heading2') {
             $p = StructuredText::parseText($json);
 
             return new HeadingBlock($p->getText(), $p->getSpans(), 2);
         }
 
-        if ($json->type == 'heading3') {
+        if ($type == 'heading3') {
             $p = StructuredText::parseText($json);
 
             return new HeadingBlock($p->getText(), $p->getSpans(), 3);
         }
 
-        if ($json->type == 'heading4') {
+        if ($type == 'heading4') {
             $p = StructuredText::parseText($json);
 
             return new HeadingBlock($p->getText(), $p->getSpans(), 4);
         }
 
-        if ($json->type == 'paragraph') {
+        if ($type == 'paragraph') {
             $p = StructuredText::parseText($json);
 
             return new ParagraphBlock($p->getText(), $p->getSpans());
         }
 
-        if ($json->type == 'list-item') {
+        if ($type == 'list-item') {
             $p = StructuredText::parseText($json);
 
             return new ListItemBlock($p->getText(), $p->getSpans(), false);
         }
 
-        if ($json->type == 'o-list-item') {
+        if ($type == 'o-list-item') {
             $p = StructuredText::parseText($json);
 
             return new ListItemBlock($p->getText(), $p->getSpans(), true);
         }
 
-        if ($json->type == 'image') {
+        if ($type == 'image') {
             $view = ImageView::parse($json);
 
             return new ImageBlock($view);
         }
 
-        if ($json->type == 'embed') {
+        if ($type == 'embed') {
             return new EmbedBlock(Embed::parse($json));
         }
 
-        if ($json->type == 'preformatted') {
-            return new PreformattedBlock($json->text, new ImmVector($json->spans));
+        if ($type == 'preformatted') {
+            $text = (string)$json->at('text');
+            $spans = \Prismic\Tools::requireImmVector($json->at('spans'));
+  
+            return new PreformattedBlock($text, $spans);
         }
 
         return null;
@@ -346,8 +348,8 @@ class StructuredText implements FragmentInterface
     {
         $blocks = new Vector();
         foreach ($json as $blockJson) {
-            $maybeBlock = StructuredText::parseBlock($blockJson);
-            if (isset($maybeBlock)) {
+            $maybeBlock = StructuredText::parseBlock(\Prismic\Tools::requireImmMap($blockJson));
+            if ($maybeBlock) {
                 $blocks->add($maybeBlock);
             }
         }

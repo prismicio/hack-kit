@@ -63,7 +63,7 @@ class Ref
             (string)$json->at('ref'),
             (string)$json->at('label'),
             (bool)(!is_null($json->get('isMasterRef')) ? $json->at('isMasterRef') : false),
-            (string)$json->at('scheduledAt')
+            (string)$json->get('scheduledAt')
         );
     }
 }

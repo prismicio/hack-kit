@@ -17,7 +17,7 @@ class Tools {
         if($any instanceof Traversable) {
             return $any;
         } else {
-            throw new \Exception("Unable to get " . (string)$any . " as Traversable");
+            throw new \Exception("Unable to get " . (string)json_encode($any) . " as Traversable");
         }
     }
 
@@ -25,7 +25,7 @@ class Tools {
         if($any instanceof KeyedTraversable) {
             return $any;
         } else {
-            throw new \Exception("Unable to get " . (string)$any . " as KeyedTraversable");
+            throw new \Exception("Unable to get " . (string)json_encode($any) . " as KeyedTraversable");
         }
     }
 

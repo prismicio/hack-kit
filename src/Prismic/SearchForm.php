@@ -24,7 +24,7 @@ class SearchForm
      */
     public function __construct(Api $api, Form $form, ImmMap<string, ImmVector<string>> $data)
     {
-        $this->api  = $api;
+        $this->api = $api;
         $this->form = $form;
         $this->data = $data;
     }
@@ -120,7 +120,7 @@ class SearchForm
     {
         $docs = $json->at('results');
         $docs = ($docs instanceof KeyedTraversable) ? $docs : array();
-        return (new ImmVector($docs))->map($doc ==> Document::parse($doc));
+        return (new ImmVector($docs))->map($doc ==> Document::parse(Tools::requireImmMap($doc)));
     }
 
     /**
@@ -189,7 +189,11 @@ class SearchForm
             $this->form->getEnctype() == 'application/x-www-form-urlencoded' &&
             $this->form->getAction()
         ) {
-            $url = $this->form->getAction() . '?' . (string)http_build_query($this->data);
+            $data = $this->data->mapWithKey(($key, $data) ==> {
+                $x = $data->filter($d ==> $d != '');
+                return $x;
+            });
+            $url = $this->form->getAction() . '?' . (string)http_build_query($data);
             $url = preg_replace('/%5B(?:[0-9]|[1-9][0-9]+)%5D=/', '=', $url);
 
             $response = Api::defaultClient()->get($url);

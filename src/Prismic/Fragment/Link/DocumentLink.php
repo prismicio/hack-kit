@@ -43,8 +43,8 @@ class DocumentLink implements LinkInterface
 
     public static function parse(ImmMap<string, mixed> $json): DocumentLink
     {
-        $document = \Prismic\Tools::requireImmMap($json);
-        $tags = is_null($document->at('tags')) ? \Prismic\Tools::requireImmVector($document->at('tags')) : ImmVector {};
+        $document = \Prismic\Tools::requireImmMap($json->at('document'));
+        $tags = !is_null($document->get('tags')) ? \Prismic\Tools::requireImmVector($document->at('tags')) : ImmVector {};
         return new DocumentLink(
             (string)$document->at('id'),
             (string)$document->at('type'),

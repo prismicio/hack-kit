@@ -11,8 +11,8 @@ class StructuredTextTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $search = json_decode(file_get_contents(__DIR__.'/../fixtures/search.json'));
-        $this->document = Document::parse($search[0]);
+        $search = json_decode(file_get_contents(__DIR__.'/../fixtures/search.json'), true);
+        $this->document = Document::parse(new ImmMap((array)$search[0]));
         $this->structuredText = $this->document->getStructuredText('product.description');
     }
 

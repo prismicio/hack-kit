@@ -96,7 +96,7 @@ class DOMDocument extends DOMNode {
     public function createCDATASection ( string $data ): DOMCDATASection {}
     public function createComment ( string $data ): DOMComment {}
     public function createDocumentFragment (  ): DOMDocumentFragment {}
-    public function createElement ( string $name, ?string $value): DOMElement {}
+    public function createElement ( string $name, ?string $value = null): DOMElement {}
     public function createElementNS ( string $namespaceURI , string $qualifiedName, ?string $value): DOMElement {}
     public function createEntityReference ( string $name ): DOMEntityReference {}
     public function createProcessingInstruction ( string $target, ?string $data): DOMProcessingInstruction {}

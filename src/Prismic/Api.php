@@ -110,9 +110,9 @@ class Api
      * @param Client $client
      * @return Api
      */
-    public static function get(string $action, ?string $accessToken=null, ?HttpClientInterface $client = null): Api
+    public static function get(string $action, ?string $accessToken = null, ?HttpClientInterface $client = null): Api
     {
-        $url = $action . (is_null($accessToken) ? '?access_token=' . $accessToken : '');
+        $url = $action . (!is_null($accessToken) ? '?access_token=' . $accessToken : '');
         $client = $client ? $client : self::defaultClient();
         $response = $client->get($url);
 
@@ -127,11 +127,11 @@ class Api
         $forms = Tools::requireImmMap($response->at('forms'));
 
         $apiData = new ApiData(
-            $refs->map($ref ==> Ref::parse($ref)),
+            $refs->map($ref ==> Ref::parse(Tools::requireImmMap($ref))),
             $bookmarks,
             $types,
             $tags,
-            $forms->map($data ==> Form::parse($data)),
+            $forms->map($data ==> Form::parse(Tools::requireImmMap($data))),
             (string)$response->at('oauth_initiate'),
             (string)$response->at('oauth_token')
         );

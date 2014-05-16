@@ -11,3 +11,4 @@ if (ini_get('date.timezone') == null) {
 }
 
 require_once 'Prismic/FakeLinkResolver.php';
+require_once 'Prismic/MockHttpClient.php';

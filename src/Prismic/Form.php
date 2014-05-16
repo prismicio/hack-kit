@@ -88,12 +88,12 @@ class Form
     {
         $fields = Tools::requireImmMap($json->at('fields'));
         return new Form(
-            (string)$json->at('name'),
+            (string)$json->get('name'),
             (string)$json->at('method'),
-            (string)$json->at('rel'),
+            (string)$json->get('rel'),
             (string)$json->at('enctype'),
             (string)$json->at('action'),
-            $fields->map($data ==> FieldForm::parse($data))
+            $fields->map($data ==> FieldForm::parse(\Prismic\Tools::requireImmMap($data)))
         );
     }
 }

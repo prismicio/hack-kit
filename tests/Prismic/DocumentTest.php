@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace Prismic\Test;
 
@@ -14,8 +14,8 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $search = json_decode(file_get_contents(__DIR__.'/../fixtures/search.json'));
-        $this->document = Document::parse($search[0]);
+        $search = json_decode(file_get_contents(__DIR__.'/../fixtures/search.json'), true);
+        $this->document = Document::parse(new ImmMap((array)$search[0]));
         $this->micro_api = Api::get(self::$testRepository);
         $this->linkResolver = new FakeLinkResolver();
     }
@@ -92,11 +92,6 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
         $views = $this->document->getAllImageViews('product.description', 'main');
         $view = $views[0];
         $this->assertEquals($view->getUrl(), $url2);
-    }
-
-    public function testGetStructuredText()
-    {
-        $this->assertEquals($this->document->getStructuredText('product.name')->asText(), 'Cool Coconut Macaron');
     }
 
     public function testGetHtml()

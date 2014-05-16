@@ -74,14 +74,13 @@ class Document
     public static function parseFragment(ImmMap<string, mixed> $json): ?FragmentInterface
     {
         if (!is_null($json->get('type'))) {
-
             $type = $json->at('type');
             $value = $json->at('value');
 
             if ($type === "Image") {
                 $value = Tools::requireImmMap($value);
                 $views = Tools::requireImmMap($value->at('views'))->mapWithKey(($key, $json) ==> {
-                    return ImageView::parse($json);
+                    return ImageView::parse(Tools::requireImmMap($json));
                 });
                 $main = Tools::requireImmMap($value->at('main'));
                 $mainView = ImageView::parse($main);
@@ -150,16 +149,16 @@ class Document
         foreach ($data as $type => $fields) {
             $fields = Tools::requireImmMap($fields);
             foreach ($fields as $key => $value) {
-                if (is_array($value)) {
+                if (!is_null(@$value[0])) {
                     for ($i = 0; $i < count($value); $i++) {
-                        $f = self::parseFragment($value[$i]);
+                        $f = self::parseFragment(Tools::requireImmMap($value[$i]));
                         if (!is_null($f)) {
                             $fragments->set($type . '.' . $key . '[' . $i . ']', $f);
                         }
                     }
                 } else {
-                    $f = self::parseFragment($value);
-                    if (!is_null($f)) {
+                    $f = self::parseFragment(\Prismic\Tools::requireImmMap($value));
+                    if ($f) {
                         $fragments->set($type . '.' . $key, $f);
                     }
                 }

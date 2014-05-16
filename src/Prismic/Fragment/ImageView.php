@@ -33,7 +33,6 @@ class ImageView
 
     public function asHtml(?LinkResolver $linkResolver = null): string
     {
-        // UNSAFE
         $doc = new DOMDocument();
         $img = $doc->createElement('img');
         $doc->appendChild($img);
