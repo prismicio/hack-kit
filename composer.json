@@ -1,6 +1,6 @@
 {
-    "name": "prismic/php-sdk",
-    "description": "PHP development kit for prismic.io",
+    "name": "prismic/hack-sdk",
+    "description": "Hack development kit for prismic.io",
 
     "autoload": {
         "psr-0": { "": "src/" }
@@ -21,7 +21,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0.3-dev"
+            "dev-master": "1.0.0-dev"
         }
     }
 }
