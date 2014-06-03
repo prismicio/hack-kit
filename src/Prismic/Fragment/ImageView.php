@@ -35,6 +35,15 @@ class ImageView
     {
         $doc = new DOMDocument();
         $img = $doc->createElement('img');
+        $attributes = array(
+            'src' => $this->getUrl(),
+            'alt' => htmlentities($this->getAlt()),
+            'width' => $this->getWidth(),
+            'height' => $this->getHeight(),
+        );
+        foreach ($attributes as $key => $value) {
+            $img->setAttribute($key, $value);
+        }
         $doc->appendChild($img);
         return trim($doc->saveHTML());
     }
