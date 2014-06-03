@@ -111,7 +111,7 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
                                       ->get("everything")
                                       ->ref($masterRef)
                                       ->query('[[:d = at(document.id, "UrDndQEAALQMyrXF")]]')
-                                      ->submit()->at(0);
+                                      ->submit()->getResults()->at(0);
 
         $docchapterdocs = $docchapter->getGroup('docchapter.docs')->getDocs();
         $this->assertEquals($docchapterdocs->count(), 2);

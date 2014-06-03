@@ -116,21 +116,32 @@ class SearchForm
      *
      * @return ImmVector
      */
-    private static function parseResult(ImmMap<string, mixed> $json): ImmVector<Document>
+    private static function parseResult(ImmMap<string, mixed> $json): Response
     {
         $docs = $json->at('results');
         $docs = ($docs instanceof KeyedTraversable) ? $docs : array();
-        return (new ImmVector($docs))->map($doc ==> Document::parse(Tools::requireImmMap($doc)));
+        $results = (new ImmVector($docs))->map($doc ==> Document::parse(Tools::requireImmMap($doc)));
+
+        return new Response(
+            $results,
+            (int)$json->at('page'),
+            (int)$json->at('results_per_page'),
+            (int)$json->at('results_size'),
+            (int)$json->at('total_results_size'),
+            (int)$json->at('total_pages'),
+            (string)$json->get('next_page'),
+            (string)$json->get('prev_page')
+        );
     }
 
     /**
      * Submit the current form to retrieve remote contents
      *
-     * @return mixed Array of Document objects
+     * @return Response
      *
      * @throws \RuntimeException
      */
-    public function submit(): ImmVector<Document>
+    public function submit(): Response
     {
         return self::parseResult($this->submit_raw());
     }
