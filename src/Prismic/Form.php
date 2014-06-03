@@ -87,10 +87,13 @@ class Form
     public static function parse(ImmMap<string, mixed> $json): Form
     {
         $fields = Tools::requireImmMap($json->at('fields'));
+        $name = $json->get('name');
+        $rel = $json->get('rel');
+
         return new Form(
-            (string)$json->get('name'),
+            !is_null($name) ? (string)$name : null,
             (string)$json->at('method'),
-            (string)$json->get('rel'),
+            !is_null($rel) ? (string)$rel : null,
             (string)$json->at('enctype'),
             (string)$json->at('action'),
             $fields->map($data ==> FieldForm::parse(\Prismic\Tools::requireImmMap($data)))

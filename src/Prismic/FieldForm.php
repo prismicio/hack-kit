@@ -47,10 +47,11 @@ class FieldForm
 
     public static function parse(ImmMap<string, mixed> $json): FieldForm
     {
+        $default = $json->get('default');
         return new FieldForm(
             (string)$json->at('type'),
             (bool)(!is_null($json->get('multiple')) ? $json->at('multiple') : false),
-            (string)$json->get('default')
+            !is_null($default) ? (string)$default : null
         );
     }
 }

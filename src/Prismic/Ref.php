@@ -59,11 +59,13 @@ class Ref
 
     public static function parse(ImmMap<string, mixed> $json): Ref
     {
+        $isMasterRef = $json->get('isMasterRef');
+        $scheduleAt = $json->get('scheduledAt');
         return new Ref(
             (string)$json->at('ref'),
             (string)$json->at('label'),
-            (bool)(!is_null($json->get('isMasterRef')) ? $json->at('isMasterRef') : false),
-            (string)$json->get('scheduledAt')
+            !is_null($isMasterRef) ? (bool)$isMasterRef : false,
+            !is_null($scheduleAt) ? (string)$scheduleAt : null
         );
     }
 }

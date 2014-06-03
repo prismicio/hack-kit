@@ -57,13 +57,17 @@ class Embed implements FragmentInterface
     public static function parse(ImmMap<string, mixed> $json): Embed
     {
         $oembed = \Prismic\Tools::requireImmMap($json->at('oembed'));
+        $width = $oembed->get('width');
+        $height = $oembed->get('height');
+        $html = $oembed->get('html');
+
         return new Embed(
             (string)$oembed->at('type'),
             (string)$oembed->at('provider_name'),
             (string)$oembed->at('embed_url'),
-            (int)$oembed->get('width'),
-            (int)$oembed->get('height'),
-            (string)$oembed->get('html'),
+            !is_null($width) ? (int)$width : null,
+            !is_null($height) ? (int)$height : null,
+            !is_null($html) ? (string)$html : null,
             $oembed
         );
     }

@@ -15,5 +15,4 @@ use Prismic\Fragment\FragmentInterface;
 
 interface LinkInterface extends FragmentInterface
 {
-    
 }

@@ -121,6 +121,8 @@ class SearchForm
         $docs = $json->at('results');
         $docs = ($docs instanceof KeyedTraversable) ? $docs : array();
         $results = (new ImmVector($docs))->map($doc ==> Document::parse(Tools::requireImmMap($doc)));
+        $nextPage = $json->get('next_page');
+        $prevPage = $json->get('prev_page');
 
         return new Response(
             $results,
@@ -129,8 +131,8 @@ class SearchForm
             (int)$json->at('results_size'),
             (int)$json->at('total_results_size'),
             (int)$json->at('total_pages'),
-            (string)$json->get('next_page'),
-            (string)$json->get('prev_page')
+            !is_null($nextPage) ? (string)$nextPage : null,
+            !is_null($prevPage) ? (string)$prevPage : null
         );
     }
 
