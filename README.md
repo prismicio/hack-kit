@@ -1,5 +1,3 @@
-[![alt text](https://travis-ci.org/prismicio/hack-kit.png?branch=master "Travis build")](https://travis-ci.org/prismicio/hack-kit)
-
 ## Hack development kit for prismic.io
 
 ### Getting started
