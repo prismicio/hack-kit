@@ -38,10 +38,6 @@ You can find out [how to get started with prismic.io](https://developers.prismic
 Also on our [prismic.io developer's portal](https://developers.prismic.io/), on top of our full documentation, you will:
  * get a thorough introduction of [how to use prismic.io kits](https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#kits-and-helpers), including this one.
 
-### Changelog
-
-Need to see what changed, or to upgrade your kit? We keep our changelog on [this repository's "Releases" tab](https://github.com/srenault/hack-kit/releases).
-
 ### Contribute to the kit
 
 Contribution is open to all developer levels, read our "[Contribute to the official kits](https://developers.prismic.io/documentation/UszOeAEAANUlwFpp/contribute-to-the-official-kits)" documentation to learn more.
